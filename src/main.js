@@ -5,14 +5,14 @@ import 'babel-polyfill';
 // Import App Custom Styles
 // import AppStyles from './css/app.css'
 
-import ElementUI from 'ifbp-element'
+import ElementUI from 'element-ui'
 Vue.use(ElementUI);
-import './css/index.css';
 import App from './vue/app';
 import vueRouter from 'vue-router'
 import Routes from './routes';
 import Vuex from 'vuex';
-import 'ifbp-element/lib/theme-default/index.css'
+import 'element-ui/lib/theme-chalk/index.css'
+import './css/index.css';
 Vue.use(vueRouter);
 Vue.use(Vuex);
 const router = new vueRouter({

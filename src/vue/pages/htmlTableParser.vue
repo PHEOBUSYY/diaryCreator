@@ -17,8 +17,10 @@
         <div class="input" v-show='template'>
             行
             
+            
             <el-input v-model.number="row" class="row_input"></el-input>
             列
+            
             
             <el-input v-model.number="column" class="column_input"></el-input>
         </div>
@@ -27,6 +29,7 @@
             <tr v-for="(item,index) in realArray" :key="index">
                 <th v-if="index === 0" v-for="(item2,index2) in realArray[index]" :key="index2">
                     <el-input v-model="realArray[index][index2]"
+                              @blur="onBlur(index,index2)"
                               :placeholder="'标题'+(index2+1)"></el-input>
                 </th>
                 <td v-if="index !==0" v-for="(item2,index2) in realArray[index]" :key="index2">
@@ -35,6 +38,7 @@
                                     :picker-options="pickOption"
                                     @change="onTimeChange(index,index2)"
                                     @focus="onTimeFocus(index,index2)"
+                                    @blur="onBlur(index,index2)"
                                     placeholder="">
                     </el-time-select>
                     <el-input v-else v-model="realArray[index][index2]"
@@ -43,8 +47,8 @@
             </tr>
         </table>
         <!--<label>预览</label>-->
-        <div ref="preview">
-        </div>
+        <!--<div ref="preview">-->
+        <!--</div>-->
         <button v-show="template" @click="btnClick">{{parsed === 0 ? '点击生成' : '清空'}}</button>
         <h4 v-show="output">输出</h4>
         <textarea v-show="output" class="output" ref="output" title="output"
@@ -52,14 +56,13 @@
     </div>
 </template>
 <script>
+
     export default {
         data: function () {
             return {
                 row: '',
                 column: '',
                 output: '',
-                copyData: [],
-                testTime: '',
                 realArray: null,
                 pickOption: {
                     start: '05:00', step: '00:10', end: '23:30'
@@ -93,21 +96,19 @@
         },
         methods: {
             initRealArray: function () {
+                let copyData = this.realArray ? this.realArray.slice(0) : null;
                 let a = [];
                 for (let i = 0; i < this.row; i++) {        //一维长度为3
                     a[i] = [];
                     for (let j = 0; j < this.column; j++) {    //二维长度为5
                         if (i === 0 && this.template === 'time' && this.options[0] && this.options[0].title && j < this.options[0].title.length) {
                             a[i][j] = this.options[0].title[j];
-                        } else if (this.copyData && this.copyData.length > 0 && this.copyData.length > i && this.copyData[i].length > j && this.copyData[i][j]) {
-                            a[i][j] = this.copyData[i][j];
+                        } else if (copyData && copyData.length > 0 && copyData.length > i && copyData[i].length > j && copyData[i][j]) {
+                            a[i][j] = copyData[i][j];
                         } else {
                             a[i][j] = '';
                         }
                     }
-                }
-                if (this.row > 0 && this.column > 0) {
-                    this.copyData = a;
                 }
                 this.realArray = a;
             },
@@ -121,20 +122,18 @@
                 }
                 if (this.parsed === 0) {
                     //存储
-                    localStorage.setItem('data', JSON.stringify(this.copyData));
+                    localStorage.setItem('data', JSON.stringify(this.realArray));
                     localStorage.setItem('row', this.row);
                     localStorage.setItem('column', this.column);
                     this.output = this.parser2();
                     this.$refs.preview.innerHTML = this.parser();
                     this.$nextTick(() => {
-//                    navigator.clipboard.writeText(this.output);
                         this.$refs.output.select();
                         document.execCommand("Copy");
                         navigator.clipboard.writeText(this.output);
                         this.parsed = 1;
                     });
                 } else {
-                    this.copyData = [];
                     this.initRealArray();
                     localStorage.setItem('data', "");
                     this.$refs.preview.innerHTML = '';
@@ -183,7 +182,7 @@
                     let line = '';
                     let isEmpty = true;
                     for (let j = 0; j < this.realArray[i].length; j++) {
-                        if (this.realArray[i][j]) {
+                        if (this.realArray[i][0] && this.realArray[i][1]) {
                             isEmpty = false;
                         }
                         line += "|" + this.realArray[i][j];
@@ -217,6 +216,11 @@
                     this.$set(this.pickOption, 'start', this.realArray[row][0]);
                 }
             },
+            onBlur: function (row, column) {
+                if (this.realArray[row][column]) {
+
+                }
+            },
             onTimeChange: function (row, column) {
                 if (column === 1 && row + 1 < this.realArray.length && this.realArray[row][column]) {
                     //设置完第二列直接把下面那一行的第一列赋值
@@ -237,13 +241,12 @@
                     this.row = '3';
                     this.column = '3';
                 }
-                this.copyData = [];
                 this.initRealArray();
-            }
+            },
         },
         mounted: function () {
             if (localStorage.getItem('data')) {
-                this.copyData = JSON.parse(localStorage.getItem('data'));
+                this.realArray = JSON.parse(localStorage.getItem('data'));
             }
             this.row = localStorage.getItem('row');
             this.column = localStorage.getItem('column');
@@ -252,67 +255,52 @@
     }
 </script>
 <style lang="scss">
-    body {
-        background: #f67280;
-    }
     
-    .el-input__inner {
-        border: none;
-        background: #c06c84;
-        color: white;
-    }
-    
-    .el-input__inner::placeholder {
-        color: white;
-    }
-    .el-icon-time:before{
-        color: #f3f3f3
-    }
-    table, td, th {
-        /*border: 1px solid #ddd;*/
-        padding: 8px;
-        border-collapse: collapse;
-        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-    }
-    
-    input {
-        text-align: center;
-    }
-    
-    table {
-        width: 90%;
-        margin: 10px;
-        padding: 10px;
-        background: inherit;
-    }
-    
-    td, th {
-        text-align: center;
-        vertical-align: center;
-        padding: 5px;
-        width: 50px;
-        height: 40px;
-        input {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: none;
-        }
-    }
-    
-    th {
-        border-bottom: 1px solid #c6c6c6;
-        padding-top: 12px;
-        padding-bottom: 12px;
-    }
-    
-    tr:nth-child(even) {
-        /*background-color: #f2f2f2;*/
-    }
-    
-    td:hover {
-        /*background-color: #ddd;*/
-    }
+    /*table, td, th {*/
+        /*!*border: 1px solid #ddd;*!*/
+        /*padding: 8px;*/
+        /*border-collapse: collapse;*/
+        /*font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;*/
+    /*}*/
+    /**/
+    /*input {*/
+        /*text-align: center;*/
+    /*}*/
+    /**/
+    /*table {*/
+        /*width: 90%;*/
+        /*margin: 10px;*/
+        /*padding: 10px;*/
+        /*background: inherit;*/
+    /*}*/
+    /**/
+    /*td, th {*/
+        /*text-align: center;*/
+        /*vertical-align: center;*/
+        /*padding: 5px;*/
+        /*width: 50px;*/
+        /*height: 40px;*/
+        /*input {*/
+            /*width: 100%;*/
+            /*height: 100%;*/
+            /*border: none;*/
+            /*background: none;*/
+        /*}*/
+    /*}*/
+    /**/
+    /*th {*/
+        /*border-bottom: 1px solid #c6c6c6;*/
+        /*padding-top: 12px;*/
+        /*padding-bottom: 12px;*/
+    /*}*/
+    /**/
+    /*tr:nth-child(even) {*/
+        /*!*background-color: #f2f2f2;*!*/
+    /*}*/
+    /**/
+    /*td:hover {*/
+        /*!*background-color: #ddd;*!*/
+    /*}*/
 </style>
 <style scoped lang="scss">
     .container {
@@ -362,6 +350,7 @@
             margin: 0 10px;
         }
     }
+    
     @media screen and (max-width: 500px) {
         .title {
             display: flex;
