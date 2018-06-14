@@ -4,6 +4,7 @@ import targetTemplate from './vue/pages/targetTemplate.vue'
 import todayTarget from './vue/pages/todayTarget.vue'
 import todayEvent from './vue/pages/todayEvent.vue'
 import todayFeeling from './vue/pages/todayFeeling.vue';
+import calendarDemo from './vue/pages/calendarDemo.vue'
 export default [
     {
         path: '/htmlTableParser',
@@ -11,7 +12,7 @@ export default [
         component: htmlTableParser
     },
     {
-        path: '/',
+        path: '/diaryTemplate',
         name: 'diaryTemplate',
         component: diaryTemplate
     },
@@ -34,5 +35,10 @@ export default [
         path: '/todayFeeling',
         name: 'todayFeeling',
         component: todayFeeling
+    },
+    {
+        path: '/',
+        name: 'calendarDemo',
+        component: calendarDemo
     }
 ]
