@@ -5,6 +5,9 @@ module.exports = {
     logDate: function (tag, date) {
         // console.log(tag, date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + ':' + date.getDay());
     },
+    pureDate: function(date){
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    },
     newDate: function (dateStr) {
         let date = dateStr ? new Date(dateStr) : new Date();
         return new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -53,6 +56,7 @@ module.exports = {
         return parseInt(this.getDateRange(beginDate, startDate) / 7);
     },
     monthOfDays: function (date) {
+        date = this.pureDate(date);
         let result = [];
         let lastDayOfPreMonth = this.beginOfCalendar(date);
         for (let i = 0; i < 42; i++) {
@@ -86,14 +90,10 @@ module.exports = {
     plusDate: function (date) {
         return new Date(date.getFullYear(), date.getMonth(), date.getDate()+1);
     },
-    parseOutofRange: function (startDate, endDate, item, maxDate) {
+    parseOutofRange: function (startDate, endDate, item) {
         //type 0,1,2,3分别对应: 单行显示,分段头部,分段中部,分段尾部
-        // console.log("parseoutofrange", startDate.toDateString(), endDate.toDateString());
         let result = [];
         //拆分日程
-        // if(endDate > maxDate){
-        //     endDate = maxDate;
-        // }
         while (startDate <= endDate) {
             let obj = {
                 item: item,
@@ -102,18 +102,22 @@ module.exports = {
                 type: 2
             };
             result.push(obj);
-            console.log("while", obj.start.toDateString(),obj.end.toDateString());
+            // console.error("split date",item.title, this.format(obj.start,true),this.format(obj.end,true));
             startDate = this.plusDate(this.getWeekEnd(startDate));
         }
         result[0].type = 1;
         result[result.length -1].type = 3;
-        console.log("parseOutofRange result", result);
+        // console.log("parseOutofRange result", result);
         return result;
     },
     isSameDay: function(date1, date2){
         return date1.getFullYear() === date2.getFullYear() &&
             date1.getMonth() === date2.getMonth() &&
             date1.getDate() === date2.getDate();
+    },
+    isSameMonth: function(data1,date2){
+        return date1.getFullYear() === date2.getFullYear() &&
+            date1.getMonth() === date2.getMonth();
     },
     nextMonth: function (date) {
         let result = new Date(date.getTime());
