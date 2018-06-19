@@ -5,7 +5,7 @@
   "description": "A sample Apache Cordova application that responds to the deviceready event.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "build": "webpack -p --config webpack.prod.js",
     "dll": "webpack -p --config webpack.dll.js",
     "dev": "webpack-dev-server --devtool eval --progress --colors --hot --open --content-base ./src --config webpack.dev.js",
@@ -30,6 +30,7 @@
     "extract-text-webpack-plugin": "^3.0.0",
     "file-loader": "^1.1.5",
     "html-webpack-plugin": "^2.30.1",
+    "jest": "^23.1.0",
     "json-server": "^0.12.1",
     "node-sass": "^4.5.3",
     "sass-loader": "^6.0.6",

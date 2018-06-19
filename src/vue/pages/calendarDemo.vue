@@ -1,41 +1,54 @@
 <template>
     <div class="container">
         <div class="title">
-            2018-06
+            <div>
+                <button @click="previewYear"><<</button>
+                <button @click="previewMonth"><</button>
+            </div>
+            <span>{{dateFormat}}</span>
+            <div>
+                <button @click="nextMonth">></button>
+                <button @click="nextYear">>></button>
+                <button @click="today">今天</button>
+            </div>
         </div>
         <div class="week">
             <div v-for="item in weekDays">
                 {{item}}
             </div>
         </div>
-        <div class="month">
+        <div class="month"
+             :class="{ [animationClass]: animated }"
+             @animationend="removeAnimation"
+        >
             <div v-for="day in days" class="day" :style="'height:'+cellHeight + 'px'">
-                <div class="day-title" :style="'height:'+dayTitleHeight+'px;line-height:'+dayTitleHeight+'px'">
+                <div class="day-title"
+                     :style="'height:'+dayTitleHeight+'px;line-height:'+dayTitleHeight+'px'">
                     {{day.getDate()}}
                 </div>
             </div>
             <div v-for="(list,oindex) in realData"
-                 :style="'top:'+(dayTitleHeight + oindex* cellHeight)+'px;height:'+(cellHeight - dayTitleHeight)+'px'" class="event_container">
-                <div draggable="true" class="demo" v-for="(item, index) in realData[oindex]"
+                 :style="'top:'+(dayTitleHeight + oindex* cellHeight)+'px;height:'+(cellHeight - dayTitleHeight)+'px'"
+                 class="event_container">
+                <div draggable="true" class="demo" v-for="(item, index) in list"
                      :style="item.style"
                      :class="parseClass(item.type)"
                      v-if="index < 5"
                 >{{item.item.title}}
                 </div>
-                <div v-if="realData[oindex].length > 5" class="event_more" @click="loadMore()">
+                <div v-if="realData[oindex] && realData[oindex].length > 5" class="event_more"
+                     @click="loadMore()">
                     <!--超过5个-->
-                    <i class="el-icon-caret-bottom" style=""></i>
+                    <i class="el-icon-caret-bottom"></i>
                 </div>
             </div>
-            <!--<div draggable="true" class="demo" v-for="item in mockData" :style="item.style"-->
-            <!--:class="parseClass(item.type)">{{item.item.title}}-->
-            <!--</div>-->
         </div>
     </div>
 </template>
 <script>
     import util from '../../util/util';
     import mock_calendar from '../../mock/mock_calendar.json'
+
     export default {
         data: function () {
             return {
@@ -45,18 +58,47 @@
                 eventItemDivide: 2,
                 weekDays: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'],
                 //数据最终会按照周数来拆分,其中如果一个日程的跨度超过一周就拆分两个对象分别放入每个周中
-                mockData: [],
-                realData: []
+                realData: [],
+                curDate: this.date,
+                animated: false,
+                direction: 'Left'
+            }
+        },
+        props: {
+            date: {
+                type: Object,
+                default: function () {
+                    return new Date();
+                }
+            }
+        },
+        watch: {
+            curDate(val, old) {
+                if (old) {
+                    if (val < old) {
+                        this.direction = 'Right'
+                    }
+                    if (val > old) {
+                        this.direction = 'Left'
+                    }
+                }
+
+                if (val !== old) {
+                    this.animated = true;
+                    this.createData();
+                }
             }
         },
         methods: {
-            createData: function (json) {
+            createData: function () {
+                let json = mock_calendar;
                 /**
                  * 需要转化的属性:top , left , width, classList
                  * @type {Array}
                  */
                 let result = [];
                 let list = [];
+                //模仿从服务器上获取到数据
                 if (json instanceof Array) {
                     json.forEach(item => {
                         let startDate = util.newDate(item.start_time);
@@ -93,12 +135,7 @@
 
                 }
                 this.realData = result;
-                result.forEach(item => {
-                    if (item) {
-                        this.mockData = this.mockData.concat(item);
-                    }
-                });
-                console.log("mockData", JSON.stringify(this.mockData));
+                console.log("realData", JSON.stringify(this.realData));
             },
             getLineNumber: function (startDate) {
                 return util.getLineNumber(this.days[0], startDate);
@@ -114,7 +151,7 @@
             },
             getTop: function (startDate, order) {
                 console.log("getTop", startDate, order);
-                return ( order * (this.eventItemHeight + this.eventItemDivide)) + "px";
+                return (order * (this.eventItemHeight + this.eventItemDivide)) + "px";
             },
             parseClass: function (type) {
                 let classList = [''];
@@ -131,15 +168,41 @@
             },
             loadMore: function () {
                 alert(123);
+            },
+            previewYear: function () {
+                this.curDate = util.prevYear(this.curDate);
+            },
+            previewMonth: function () {
+                this.curDate = util.prevMonth(this.curDate);
+            },
+            nextYear: function () {
+                this.curDate = util.nextYear(this.curDate);
+            },
+            nextMonth: function () {
+                this.curDate = util.nextMonth(this.curDate);
+            },
+            today: function () {
+                this.curDate = new Date();
+            },
+            removeAnimation: function () {
+                this.animated = false;
             }
+            
+
         },
         computed: {
             days: function () {
-                return util.monthOfDays(util.newDate())
+                return util.monthOfDays(this.curDate)
             },
+            dateFormat: function () {
+                return util.format(this.curDate);
+            },
+            animationClass: function () {
+                return 'sc-moveTo' + this.direction;
+            }
         },
         mounted: function () {
-            this.createData(mock_calendar);
+            this.createData();
         }
     }
 </script>
@@ -152,6 +215,9 @@
         .title {
             border: 1px solid #f3f3f3;
             text-align: center;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
         }
         .week {
             border: 1px solid #f3f3f3;
@@ -218,5 +284,35 @@
             }
         }
         
+    }
+    
+    .sc-moveToLeft {
+        animation: scMoveToLeft .3s both;
+    }
+    
+    .sc-moveToRight {
+        animation: scMoveToRight .3s both;
+    }
+    
+    @keyframes scMoveToLeft {
+        from {
+            transform: translate3d(50%, 0, 0);
+            visibility: visible;
+        }
+        
+        to {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+    
+    @keyframes scMoveToRight {
+        from {
+            transform: translate3d(-50%, 0, 0);
+            visibility: visible;
+        }
+        
+        to {
+            transform: translate3d(0, 0, 0);
+        }
     }
 </style> 

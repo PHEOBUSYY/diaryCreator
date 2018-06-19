@@ -64,9 +64,9 @@ module.exports = {
         return result;
     },
     getDateRange: function (start, end) {
-        console.log("getDaterange", start, end);
+        // console.log("getDaterange", start, end);
         let result = (Math.abs(end.getTime() - start.getTime())) / 1000 / 60 / 60 / 24;
-        console.log("getDateRange", result);
+        // console.log("getDateRange", result);
         return parseInt(result) + 1;
     },
     isOutofSingleLine: function (start, end) {
@@ -77,15 +77,18 @@ module.exports = {
         weekEnd.setDate(weekEnd.getDate() + (6 - weekEnd.getDay()));
         return weekEnd;
     },
-    format: function (date) {
-        return date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
+    format: function (date,hasDate) {
+        if(hasDate){
+            return date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
+        }
+        return date.getFullYear() + "-" + (date.getMonth() + 1);
     },
     plusDate: function (date) {
         return new Date(date.getFullYear(), date.getMonth(), date.getDate()+1);
     },
     parseOutofRange: function (startDate, endDate, item, maxDate) {
         //type 0,1,2,3分别对应: 单行显示,分段头部,分段中部,分段尾部
-        console.log("parseoutofrange", startDate.toDateString(), endDate.toDateString());
+        // console.log("parseoutofrange", startDate.toDateString(), endDate.toDateString());
         let result = [];
         //拆分日程
         // if(endDate > maxDate){
@@ -107,7 +110,33 @@ module.exports = {
         console.log("parseOutofRange result", result);
         return result;
     },
+    isSameDay: function(date1, date2){
+        return date1.getFullYear() === date2.getFullYear() &&
+            date1.getMonth() === date2.getMonth() &&
+            date1.getDate() === date2.getDate();
+    },
+    nextMonth: function (date) {
+        let result = new Date(date.getTime());
+        result.setMonth(result.getMonth() + 1);
+        return result;
+    },
+    prevMonth: function (date) {
+        let result = new Date(date.getTime());
+        result.setMonth(result.getMonth() - 1);
+        return result;
+    },
+    nextYear: function (date) {
+        let result = new Date(date.getTime());
+        result.setFullYear(result.getFullYear() + 1);
+        return result;
 
+    },
+    prevYear: function (date) {
+        let result = new Date(date.getTime());
+        result.setFullYear(result.getFullYear() - 1);
+        return result;
+
+    }
 
 
 
