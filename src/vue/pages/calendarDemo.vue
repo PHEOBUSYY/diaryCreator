@@ -2,12 +2,15 @@
     <div class="container">
         <div class="title">
             <div slot="start">
-                <el-button size="mini" type="button" class="picker-btn" @click="today">今天</el-button>
+                <el-button size="mini" type="button" class="picker-btn" @click="today">今天
+                </el-button>
             </div>
             <div>
                 <!--<el-button size="mini" type="button" class="picker-btn" @click="previewYear"><<</el-button>-->
-                <el-button size="mini" type="button" class="picker-btn" @click="previewMonth"><</el-button>
-                <span class="pickTitle" v-if="!pickMode" @click="changePickMode" style="margin:0 5px">{{dateFormat}}</span>
+                <el-button size="mini" type="button" class="picker-btn" @click="previewMonth"><
+                </el-button>
+                <span class="pickTitle" v-if="!pickMode" @click="changePickMode"
+                      style="margin:0 5px">{{dateFormat}}</span>
                 <el-date-picker
                         @blur="togglePickMode"
                         v-if="pickMode"
@@ -18,7 +21,8 @@
                         type="month"
                         placeholder="选择月">
                 </el-date-picker>
-                <el-button size="mini" type="button" class="picker-btn" @click="nextMonth">></el-button>
+                <el-button size="mini" type="button" class="picker-btn" @click="nextMonth">>
+                </el-button>
                 <!--<el-button size="mini" type="button" class="picker-btn" @click="nextYear">>></el-button>-->
             </div>
             <div slot="end">
@@ -136,6 +140,9 @@
         },
         methods: {
             createData: function () {
+                let param_start = util.format(this.days[0],true);
+                let param_end = util.format(this.days[41],true);
+                console.log("start and end", param_start, param_end);
                 let json = mock_calendar;
                 let list = this.filterAndFormatEvent(json);
                 this.realData = this.renderEvent(list);
@@ -174,18 +181,23 @@
             },
             previewYear: function () {
                 this.curDate = util.prevYear(this.curDate);
+                this.pickMode = false;
             },
             previewMonth: function () {
                 this.curDate = util.prevMonth(this.curDate);
+                this.pickMode = false;
             },
             nextYear: function () {
                 this.curDate = util.nextYear(this.curDate);
+                this.pickMode = false;
             },
             nextMonth: function () {
                 this.curDate = util.nextMonth(this.curDate);
+                this.pickMode = false;
             },
             today: function () {
                 this.curDate = new Date();
+                this.pickMode = false;
             },
             removeAnimation: function () {
                 this.animated = false;
@@ -230,7 +242,8 @@
                             top: this.getTop(item.start, result[lineNumber].length),
                             left: this.getLeft(item.start),
                             width: this.getWidth(item.start, item.end),
-                            height: this.eventItemHeight + 'px'
+                            height: this.eventItemHeight + 'px',
+                            lineHeight: this.eventItemHeight + 'px'
                         };
                         result[lineNumber].push(item);
                     }
@@ -272,6 +285,7 @@
 </script>
 <style scoped lang="scss">
     .container {
+        width: 100%;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -285,18 +299,18 @@
             background: transparent;
             color: #afafaf;
         }
-        .pickTitle{
+        .pickTitle {
             padding: 5px;
             cursor: pointer;
         }
-        .pickTitle:hover{
+        .pickTitle:hover {
             background: #8ccbff;
             border-radius: 5px;
         }
         .picker-btn:hover {
             background: #8ccbff;
         }
-        .picker{
+        .picker {
             width: 110px;
             text-align: center;
             border: 0;
@@ -353,6 +367,9 @@
                 text-align: left;
                 padding-left: 10px;
                 box-sizing: border-box;
+                overflow: hidden;
+                display: flex;
+                align-items: center;
             }
             .start-border {
                 border-top-left-radius: 10px;
