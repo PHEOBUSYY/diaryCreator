@@ -17,8 +17,11 @@ module.exports = {
     },
     resolve: {
         extensions: ['.js', '.vue', '.json'],
-        alias: {
-            vue: 'vue/dist/vue.js'
+        alias     : {
+            'vue'       : 'vue/dist/vue.common.js',
+            // Semantic-UI
+            'semantic'  : path.resolve(__dirname, '../node_modules/semantic-ui-css/semantic.min.js'),
+            'jquery': 'jquery'
         }
     },
     plugins: [
@@ -61,17 +64,16 @@ module.exports = {
                 'babel-loader?presets[]=es2015&presets[]=react', 'eslint-loader'
             ], include: APP_PATH
             },
-            // {test: /\.scss$/, loader: 'style-loader!css-loader!sass-loader?sourceMap'},
             {
-              test: /\.sass$/,
-              loaders: ['style', 'css', 'sass']
+              test: /\.(sass|scss)$/,
+              loaders: ['style-loader', 'css-loader', 'sass-loader']
             },
             {
                 test: /\.(png|jpg|gif)$/,
                 loader: 'url-loader?limit=8192&name=./static/img/[hash].[ext]'
             },
             {
-                test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+                test: /\.(woff2?|eot|ttf|otf|svg)(\?.*)?$/,
                 loader: 'url-loader',
             }
         ]

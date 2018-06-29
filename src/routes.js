@@ -12,7 +12,7 @@ export default [
         component: htmlTableParser
     },
     {
-        path: '/diaryTemplate',
+        path: '/',
         name: 'diaryTemplate',
         component: diaryTemplate
     },
@@ -37,7 +37,7 @@ export default [
         component: todayFeeling
     },
     {
-        path: '/',
+        path: '/calendarDemo',
         name: 'calendarDemo',
         component: calendarDemo
     }
