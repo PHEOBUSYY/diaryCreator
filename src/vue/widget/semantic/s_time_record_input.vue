@@ -6,13 +6,13 @@
         </div>
         <el-time-select style="width: 100px" :picker-options="pickOption" title="input"
                         v-model="realData.start"
-                        @change="timeChange(0)"
+                        @change="dataChange(0)"
         />
         <el-time-select style="width: 100px" :picker-options="pickOption" title="input"
                         v-model="realData.end"
-                        @change="timeChange(1)"
+                        @change="dataChange(1)"
         />
-        <el-input style="width: 100px"></el-input>
+        <el-input @blur="dataChange" style="width: 100px" v-model="realData.remark"></el-input>
         <div v-if="rLabel" class="ui basic label">{{rLabel}}</div>
     </div>
 </template>
@@ -20,6 +20,8 @@
 <script>
     export default {
         name: "s_input",
+        components:{
+        },
         data: function () {
             return {
                 pickOption: {
@@ -64,7 +66,8 @@
                     return {
                         start: '',
                         end: '',
-                        event: ''
+                        event: '',
+                        remark: ''
                     };
                 },
                 required: false
@@ -87,7 +90,6 @@
             },
             dropdownEvent: function () {
                 let values = [];
-                console.log("selected", this.selected);
 
                 if (this.event && this.event.length > 0) {
                     for (let i = 0; i < this.event.length; i++) {
@@ -101,35 +103,50 @@
                 }
                 return values;
             },
+            timeOptionStart: function(){
+                return this.realData.start;
+            },
+            timeOptionEnd: function(){
+                return this.realData.start;
+            },
+            
+        },
+        watch: {
+            timeOptionStart: function (newData) {
+              if(newData){
+                  this.$set(this.pickOption,'start',newData);
+              }
+          }
         },
         methods: {
-            getDropdownValue: function () {
-                let dropdown = $('#' + this.id);
-                return dropdown.dropdown('get text');//如果取值就用「get value」
-            },
-            parse: function () {
-                this.realData.event = this.getDropdownValue();
-                let result = '|' + this.getDropdownValue();
-                result += '|' + this.realData.start;
-                result += '|';
-                result += '|' + this.realData.end;
-                result += '|';
-                return result;
-            },
-            timeChange: function (index) {
-                if (index === 1) {
-                    //如果是第二个时间切换，通知外部组件
-                    this.$emit('timeChange', this.realData.end);
+            dataChange: function (index) {
+                if(!this.realData.start){
+                    this.realData.start = '';
                 }
+                if(!this.realData.end){
+                    this.realData.end = '';
+                }
+                if(!this.realData.remark){
+                    this.realData.remark = '';
+                }
+                this.$emit('timeChange', this.realData);
             },
+            dropdownInit: function () {
+                let dropdown = $('#' + this.id);
+                dropdown.dropdown({
+                    transition: 'drop',
+                    values: this.dropdownEvent,
+                    onChange: (value, text, $selectedItem) =>{
+                        //监听选中
+                        this.realData.event = text;
+                        this.dataChange();
+                    }
+                })
+            }
 
         },
         mounted: function () {
-            let dropdown = $('#' + this.id);
-            dropdown.dropdown({
-                transition: 'drop',
-                values: this.dropdownEvent
-            });
+            this.dropdownInit();
         }
     }
 </script>

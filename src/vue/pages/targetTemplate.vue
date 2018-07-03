@@ -5,7 +5,7 @@
                 <a href="#">首页</a>
             </router-link>
         </nav>
-        <h3>目标模板</h3>
+        <diary_section_header title="目标模板"></diary_section_header>
         <el-date-picker
                 v-model="timeRange"
                 type="week"
@@ -15,60 +15,19 @@
                 :picker-options="pickerOptions"
         >
         </el-date-picker>
-        <!--<el-date-picker-->
-        <!--v-model="timeRange"-->
-        <!--type="week"-->
-        <!--align="right"-->
-        <!--range-separator="至"-->
-        <!--start-placeholder="开始日期"-->
-        <!--end-placeholder="结束日期"-->
-        <!--@change="timeChange"-->
-        <!--format="yyyy-MM-dd"-->
-        <!--value-format="yyyy-MM-dd"-->
-        <!--:picker-options="pickerOptions2">-->
-        <!--</el-date-picker>-->
-        <div v-for="(item, index) in targetList">
-            <label :for="'star'+index"><i
-                    :class="item.isStar? 'el-icon-star-on':'el-icon-star-off'"></i></label>
-            <input title="star" v-show="false" type="checkbox" v-model="item.isStar"
-                   :id="'star'+index"/>
-            <el-input class="target-input" autosize clearable
-                      v-model="targetList[index].value"></el-input>
-            <el-button @click="item.editable = !item.editable" size="small" type="primary"
-                       icon="el-icon-edit" circle
-                       v-if="item.value"></el-button>
-            <el-button @click="delTarget(index)" size="small" type="danger" icon="el-icon-delete"
-                       circle v-if="item.value"></el-button>
-            <div style="padding:10px 20px;background: #f3f3f3" v-if="item.editable && item.value">
-                <div style="font-size: 12px;margin:0 5px;">重复频率</div>
-                <el-select value="" class="repeat-select" size="mini" v-model="item.repeatType"
-                           placeholder="" @change="changeRepeatType(item)">
-                    <el-option
-                            v-for="option in repeat_options"
-                            :key="option.value"
-                            :label="option.label"
-                            :value="option.value">
-                    </el-option>
-                </el-select>
-                <el-checkbox-group v-if="item.repeatType === '3'" v-model="item.frequency"
-                                   size="mini">
-                    <el-checkbox-button v-for="day in weekDays" :label="day" :key="day">{{day}}
-                    
-                    
-                    
-                    </el-checkbox-button>
-                </el-checkbox-group>
-            </div>
-        
+        <div v-if="timeRange">
+            <target_item v-for="(item, index) in targetList" v-model="targetList[index]"
+                         :id="index+''"></target_item>
         </div>
-        <div class="bottom-btn">
-            <el-button @click="addNew" size="small" type="primary" icon="el-icon-plus"
-                       circle></el-button>
-            <el-button v-if="realData.length > 0" @click="dialogVisible = true" size="small"
-                       type="danger" icon="el-icon-close"
-                       circle></el-button>
-            <el-button @click="save" v-if="realData.length > 0" size="small" type="success"
-                       icon="el-icon-check" circle></el-button>
+        <div class="bottom-btn" v-if="timeRange">
+            <button v-if="targetList[targetList.length-1].text" class="mini ui basic button teal" @click="addNew"
+            >add
+            </button>
+            <button class="mini ui basic button teal" v-if="targetList.length > 0"
+                    @click="dialogVisible = true">clear
+            </button>
+            <button class="mini ui basic button teal" @click="save" v-if="targetList.length > 0">OK
+            </button>
         </div>
         <el-input v-if="generate" v-model="generate" type="textarea" autosize></el-input>
         <el-dialog
@@ -86,7 +45,11 @@
 </template>
 
 <script>
+    import Target_item from "../widget/target_item";
+    import diary_section_header from '../widget/diary_section_header'
+
     export default {
+        components: {Target_item, diary_section_header},
         data: function () {
             return {
                 storageKey: 'target',
@@ -107,81 +70,42 @@
                     label: '无'
                 }],
                 pickerOptions: {
-                    firstDayOfWeek : 1
+                    firstDayOfWeek: 1
                 },
-//                pickerOptions2: {
-//                    shortcuts: [{
-//                        text: '当前周',
-//                        onClick(picker) {
-//                            const now = new Date();
-//                            const end = new Date();
-//                            //获取每周的第一天是 天数date - 星期数 + 1;最后一天是获取到第一天之后加6
-//                            end.setDate(now.getDate() - now.getDay() + 1 + 6);
-//                            const start = new Date();
-//                            start.setDate(now.getDate() - now.getDay() + 1);
-//                            picker.$emit('pick', [start, end]);
-//                        }
-//                    }, {
-//                        text: '当前月',
-//                        onClick(picker) {
-//                            const now = new Date();
-//                            const end = new Date();
-//                            end.setMonth(now.getMonth() + 1);
-//                            end.setDate(0);
-//                            const start = new Date();
-//                            start.setDate(1);
-//                            picker.$emit('pick', [start, end]);
-//                        }
-//                    }, {
-//                        text: '当前年',
-//                        onClick(picker) {
-//                            const now = new Date();
-//                            const end = new Date();
-//                            end.setFullYear(now.getFullYear() + 1);
-//                            end.setMonth(0);
-//                            end.setDate(0);
-//                            const start = new Date();
-//                            start.setDate(1);
-//                            start.setMonth(0);
-//                            picker.$emit('pick', [start, end]);
-//                        }
-//                    }]
-//                },
                 timeRange: '',
-                generate: ''
+                generate: '',
             };
         },
         computed: {
-            realData: function () {
-                return this.targetList.filter(item => {
-                    return item.value;
-                });
-            },
+            // realData: function () {
+            //     return this.targetList.filter(item => {
+            //         return item.text;
+            //     });
+            // },
             realTime: function () {
-                console.log("timeRange", this.timeRange);
                 let date = new Date(this.timeRange);
                 date.setDate(date.getDate() - date.getDay() + 1);
-                return date.getFullYear() + "-" + ( date.getMonth() + 1) + "-" + date.getDate();
+                return date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
             }
         },
         methods: {
             addNew: function () {
                 this.targetList.push({
-                    value: '',
-                    isStar: false,
+                    text: '',
+                    star: false,
                     editable: false,
-                    repeatType: '',
-                    frequency: []
+                    type: 0,
+                    week: []
                 })
-            },
-            delTarget: function (index) {
-                this.targetList.splice(index, 1);
             },
             save: function () {
                 console.log("realTime", this.realTime);
                 let cache = {};
-                if (this.realData.length > 0) {
-                    cache[this.realTime] = this.realData;
+                console.log("save", JSON.stringify(this.targetList));
+                if (this.targetList.length > 0) {
+                    cache[this.realTime] = this.targetList.filter(item =>{
+                        return item.text;
+                    });
                     localStorage.setItem(this.storageKey, JSON.stringify(cache));
                     this.generateTemplate();
                     this.$message({
@@ -213,32 +137,24 @@
                     }
                 } else {
                     this.targetList = [];
-                    this.addNew();
-                }
-            },
-            changeRepeatType: function (item) {
-                item.frequency = [];
-                if (item.repeatType === '1') {
-                    //工作日
-                    item.frequency = this.weekDays.slice(0, 5);
-                } else if (item.repeatType === '2') {
-                    item.frequency = this.weekDays.slice();
+                    for (let i = 0; i < 7; i++) {
+                        this.addNew();
+                    }
                 }
             },
             generateSingleLine: function (prefix, item) {
                 //生成的单行格式
-                if (item.isStar) {
-                    return '- [ ] <font color=44C0FF>' + prefix + '. ' + item.value + '</font>\r\n'
+                if (item.star) {
+                    return '- [ ] <font color=44C0FF>' + prefix + '. ' + item.text + '</font>\r\n'
                 } else {
-                    return '- [ ] ' + prefix + '. ' + item.value + '\r\n'
+                    return '- [ ] ' + prefix + '. ' + item.text + '\r\n'
                 }
             },
             generateTemplate: function () {
                 let result = [];
                 this.targetList.forEach(item => {
-                    if (item.frequency && item.frequency.length > 0) {
-                        let weekArray = item.frequency;
-                        weekArray.forEach(weekDay => {
+                    if (item.week && item.week.length > 0) {
+                        item.week.forEach(weekDay => {
                             let index = this.weekDays.indexOf(weekDay);
                             if (!result[index]) {
                                 result[index] = [];
@@ -273,7 +189,9 @@
 
         },
         mounted: function () {
-
+            for (let i = 0; i < 7; i++) {
+                this.addNew();
+            }
         }
     };
 </script>
@@ -281,11 +199,14 @@
     .container {
         width: 50%;
         margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        .item {
+        }
     }
     
     .target-input {
-        width: 200px;
-        margin-right: 10px;
     }
     
     label {

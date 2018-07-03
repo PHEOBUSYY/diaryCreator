@@ -3,7 +3,7 @@
         <div class="ui label" :class="labelClass">
             {{label}}
         </div>
-        <input title="input" type="text" :placeholder="placeHolder" v-model="value"/>
+        <input title="input" type="text" :placeholder="placeholder" @input="$emit('input', $event.target.value)" :value="value"/>
         <div v-if="rLabel" class="ui basic label">{{rLabel}}</div>
     </div>
 </template>
@@ -13,7 +13,6 @@
         name: "s_input",
         data: function () {
             return {
-                value: "",
                 time: "",
             }
         },
@@ -26,15 +25,19 @@
                 type: String,
                 default: ''
             },
-            placeHolder: {
+            placeholder: {
                 type: String,
-                default: "input something"
+                default: "写点什么吧"
             },
             fluid: {
                 type: Boolean,
                 default: false
             },
             color: {
+                type: String,
+                default: ""
+            },
+            value: {
                 type: String,
                 default: ""
             }
@@ -56,6 +59,8 @@
             }
         },
         mounted: function () {
+        },
+        methods: {
         }
     }
 </script>
