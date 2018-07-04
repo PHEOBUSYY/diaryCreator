@@ -3,7 +3,7 @@
         <div class="ui label" :class="labelClass">
             {{label}}
         </div>
-        <input title="input" type="text" :placeholder="placeholder" @input="$emit('input', $event.target.value)" :value="value"/>
+        <input :disabled="disabled" title="input" type="text" :placeholder="placeholder" @input="$emit('input', $event.target.value)" :value="value"/>
         <div v-if="rLabel" class="ui basic label">{{rLabel}}</div>
     </div>
 </template>
@@ -40,6 +40,10 @@
             value: {
                 type: String,
                 default: ""
+            },
+            disabled: {
+                type: Boolean,
+                default: false
             }
         },
         computed: {

@@ -9,19 +9,19 @@
         <div v-for="(tab, index) in tabs" class="ui tab" :class="index === current ? 'active': ''"
              :data-tab="'tab-'+index">
             <div v-if="index === 0" class="ui container">
-                <s_time_record_group ref="group" :sign="tab" :size.number="3" :event="events[index]"></s_time_record_group>
+                <s_time_record_group ref="group" :sign="tab" :size.number="3" :event="events[index]" :pickRange="{  start: '05:00', step: '00:10', end: '9:00'}"></s_time_record_group>
             </div>
             <div v-if="index === 1">
-                <s_time_record_group ref="group" :sign="tab" :size.number="5" :event="events[index]"></s_time_record_group>
+                <s_time_record_group ref="group" :sign="tab" :size.number="5" :event="events[index]" :pickRange="{  start: '09:00', step: '00:10', end: '11:30'}"></s_time_record_group>
             </div>
             <div v-if="index === 2">
-                <s_time_record_group ref="group" :sign="tab" :size.number="5" :event="events[index]"></s_time_record_group>
+                <s_time_record_group ref="group" :sign="tab" :size.number="5" :event="events[index]" :pickRange="{  start: '11:30', step: '00:10', end: '13:30'}"></s_time_record_group>
             </div>
             <div v-if="index === 3">
-                <s_time_record_group ref="group" :sign="tab"  :size.number="5" :event="events[index]"></s_time_record_group>
+                <s_time_record_group ref="group" :sign="tab"  :size.number="5" :event="events[index]" :pickRange="{  start: '13:30', step: '00:10', end: '17:30'}"></s_time_record_group>
             </div>
             <div v-if="index === 4">
-                <s_time_record_group ref="group" :sign="tab"  :size.number="5" :event="events[index]"></s_time_record_group>
+                <s_time_record_group ref="group" :sign="tab"  :size.number="5" :event="events[index]" :pickRange="{  start: '17:30', step: '00:10', end: '23:30'}"></s_time_record_group>
             </div>
             
         </div>

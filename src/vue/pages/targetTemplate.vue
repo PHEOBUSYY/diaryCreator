@@ -1,12 +1,15 @@
 <template>
     <div class="container">
-        <nav>
-            <router-link to="/">
-                <a href="#">首页</a>
-            </router-link>
-        </nav>
+        <div class="ui breadcrumb ">
+            <a class="section labeled teal " href="#" @click="$router.push({path: '/'})">
+                首页
+            </a>
+            <div class="divider"> |</div>
+            <a class="section labeled teal active">目标</a>
+        </div>
         <diary_section_header title="目标模板"></diary_section_header>
         <el-date-picker
+                style="width: 50%"
                 v-model="timeRange"
                 type="week"
                 @change="timeChange"
@@ -15,18 +18,18 @@
                 :picker-options="pickerOptions"
         >
         </el-date-picker>
-        <div v-if="timeRange">
-            <target_item v-for="(item, index) in targetList" v-model="targetList[index]"
-                         :id="index+''"></target_item>
-        </div>
-        <div class="bottom-btn" v-if="timeRange">
-            <button v-if="targetList[targetList.length-1].text" class="mini ui basic button teal" @click="addNew"
+        <target_item v-for="(item, index) in targetList" v-model="targetList[index]"
+                     :key="index+'_target_item_'"
+                     :sid="index+'_target_item_'+realTime"></target_item>
+        <div class="bottom-btn" v-if="timeRange  && targetList.length>0">
+            <button v-if="targetList[targetList.length-1].text" class="mini ui basic button teal"
+                    @click="addNew"
             >add
             </button>
-            <button class="mini ui basic button teal" v-if="targetList.length > 0"
+            <button class="mini ui basic button teal" v-if="realData.length > 0"
                     @click="dialogVisible = true">clear
             </button>
-            <button class="mini ui basic button teal" @click="save" v-if="targetList.length > 0">OK
+            <button class="mini ui basic button teal" @click="save" v-if="realData.length > 0">OK
             </button>
         </div>
         <el-input v-if="generate" v-model="generate" type="textarea" autosize></el-input>
@@ -77,15 +80,15 @@
             };
         },
         computed: {
-            // realData: function () {
-            //     return this.targetList.filter(item => {
-            //         return item.text;
-            //     });
-            // },
             realTime: function () {
                 let date = new Date(this.timeRange);
                 date.setDate(date.getDate() - date.getDay() + 1);
                 return date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
+            },
+            realData: function () {
+                return this.targetList.filter(item => {
+                    return item.text;
+                })
             }
         },
         methods: {
@@ -99,11 +102,15 @@
                 })
             },
             save: function () {
-                console.log("realTime", this.realTime);
-                let cache = {};
-                console.log("save", JSON.stringify(this.targetList));
+                let cache = localStorage.getItem(this.storageKey);
                 if (this.targetList.length > 0) {
-                    cache[this.realTime] = this.targetList.filter(item =>{
+                    if (!cache) {
+                        cache = {}
+                    } else {
+                        cache = JSON.parse(cache);
+                    }
+                    console.log("save realTime", this.realTime);
+                    cache[this.realTime] = this.targetList.filter(item => {
                         return item.text;
                     });
                     localStorage.setItem(this.storageKey, JSON.stringify(cache));
@@ -120,27 +127,39 @@
                 }
 
             },
-            clear: function () {
-                localStorage.removeItem(this.storageKey);
+            initEmpty: function () {
                 this.targetList = [];
-                this.addNew();
+                for (let i = 0; i < 7; i++) {
+                    this.addNew();
+                }
+                this.generate = '';
             },
-            timeChange: function () {
+            clear: function () {
                 let cache = localStorage.getItem(this.storageKey);
                 if (cache) {
                     cache = JSON.parse(cache);
                     if (cache[this.realTime]) {
-                        this.targetList = cache[this.realTime];
-                    } else {
-                        this.targetList = [];
-                        this.addNew();
-                    }
-                } else {
-                    this.targetList = [];
-                    for (let i = 0; i < 7; i++) {
-                        this.addNew();
+                        delete cache[this.realTime];
                     }
                 }
+                localStorage.setItem(this.storageKey, JSON.stringify(cache));
+                this.initEmpty();
+            },
+            timeChange: function () {
+                //切换时间
+                let cache = localStorage.getItem(this.storageKey);
+                if (cache) {
+                    console.log("get realTime", this.realTime);
+                    cache = JSON.parse(cache);
+                    if (cache[this.realTime]) {
+                        this.targetList = cache[this.realTime];
+                    } else {
+                        this.initEmpty();
+                    }
+                } else {
+                    this.initEmpty();
+                }
+
             },
             generateSingleLine: function (prefix, item) {
                 //生成的单行格式
@@ -189,9 +208,8 @@
 
         },
         mounted: function () {
-            for (let i = 0; i < 7; i++) {
-                this.addNew();
-            }
+            this.timeRange = new Date().toDateString();
+            this.timeChange();
         }
     };
 </script>
@@ -202,7 +220,12 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        .item {
+        padding: 15px;
+        & > div {
+            &:nth-child(2) {
+                margin: 25px 5px;
+            }
+            
         }
     }
     

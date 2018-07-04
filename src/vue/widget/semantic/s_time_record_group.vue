@@ -5,6 +5,7 @@
                              :event="event" :id="sign + 's_time_record_input'+index"
                              :key="index"
                              :data="item"
+                             :pickRange="pickRange"
                              @timeChange="updateTime(index,arguments)"></s_time_record_input>
         <button v-if="dataList.length>0 && dataList[dataList.length - 1].end" @click="addNewLine" class="ui teal basic button mini" style="margin-top: 5px">add</button>
     </div>
@@ -38,6 +39,12 @@
             sign: {
                 type: String,
                 default: ''
+            },
+            pickRange: {
+                type:Object,
+                default: function () {
+                    return {};
+                }
             }
         },
         methods: {

@@ -19,7 +19,7 @@
                 dataList: [
                     {
                         value: '',
-                        fluid: false,
+                        fluid: true,
                         color: 'teal',
                         label: title,
                         placeholder: '请输入照片名称'

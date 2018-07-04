@@ -1,8 +1,8 @@
 <template>
     <div class="container">
     <h3 class="ui header teal">
-        <img src="https://semantic-ui.com/images/avatar2/large/patrick.png"
-             class="ui circular image">
+        <img src="../../css/static/img/diary.svg"
+             class="ui rounded mini image">
         {{title}}
     </h3>
     </div>

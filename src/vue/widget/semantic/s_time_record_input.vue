@@ -24,9 +24,7 @@
         },
         data: function () {
             return {
-                pickOption: {
-                    start: '05:00', step: '00:10', end: '23:30'
-                },
+                pickOption: this.pickRange,
                 eventOption: [],
                 time: "",
                 realData: this.data
@@ -72,6 +70,12 @@
                 },
                 required: false
             },
+            pickRange: {
+                type:Object,
+                default: {
+                    start: '05:00', step: '00:10', end: '23:30'
+                }
+            }
         },
         computed: {
             classList: function () {
@@ -103,21 +107,21 @@
                 }
                 return values;
             },
-            timeOptionStart: function(){
-                return this.realData.start;
-            },
-            timeOptionEnd: function(){
-                return this.realData.start;
-            },
+            // timeOptionStart: function(){
+            //     return this.realData.start;
+            // },
+            // timeOptionEnd: function(){
+            //     return this.realData.start;
+            // },
             
         },
-        watch: {
-            timeOptionStart: function (newData) {
-              if(newData){
-                  this.$set(this.pickOption,'start',newData);
-              }
-          }
-        },
+        // watch: {
+        //     timeOptionStart: function (newData) {
+        //       if(newData){
+        //           // this.$set(this.pickOption,'start',newData);
+        //       }
+        //   }
+        // },
         methods: {
             dataChange: function (index) {
                 if(!this.realData.start){
@@ -136,7 +140,7 @@
                 dropdown.dropdown({
                     transition: 'drop',
                     values: this.dropdownEvent,
-                    onChange: (value, text, $selectedItem) =>{
+                    onChange: (value, text) =>{
                         //监听选中
                         this.realData.event = text;
                         this.dataChange();

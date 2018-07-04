@@ -1,8 +1,9 @@
 <template>
     <div class="ui buttons">
-        <button class="ui button teal" @click="checkItem(index)"
-                :class="item.checked ? 'active':''" v-for="(item,index) in dataList" :key="index">
-            {{item.title}}
+        <button class="mini ui button teal" @click="checkItem(index)"
+                :class="dataList.indexOf(item) >-1 ? 'active':''" v-for="(item,index) in week"
+                :key="index">
+            {{item}}
         </button>
     </div>
 </template>
@@ -13,7 +14,7 @@
         data: function () {
             return {
                 week: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
-                dataList: []
+                dataList: this.value
             }
         },
         props: {
@@ -37,65 +38,34 @@
             }
         },
         methods: {
-            init: function () {
-                this.week.forEach(item => {
-                    this.dataList.push({
-                        title: item,
-                        checked: false
-                    })
-                })
-            },
             changeCheck: function (type) {
-                console.log("changeCheck", type);
                 //这个时候dom元素并没有完全变化，需要等待下次渲染完成回调才能显示出来，所以使用nextTick
                 this.$nextTick(function () {
                     if (type === 2) {
                         //工作日
-                        for (let i = 0; i < this.dataList.length; i++) {
-                            let item = this.dataList[i];
-                            item.checked = i < 5;
-                            this.$set(this.dataList, i, item);
-                        }
+                        this.dataList = this.week.slice(0, 5);
                     } else if (type === 3) {
                         //每天
-                        for (let i = 0; i < this.dataList.length; i++) {
-                            let item = this.dataList[i];
-                            item.checked = true;
-                            this.$set(this.dataList, i, item);
-                        }
+                        this.dataList = this.week.slice(0, 7);
                     } else if (type === 1 || type === 0) {
                         //自定义
-                        for (let i = 0; i < 7; i++) {
-                            let item = this.dataList[i];
-                            item.checked = false;
-                            this.$set(this.dataList, i, item);
-                        }
+                        this.dataList = this.value;
                     }
-                    let result = this.getCheckedList();
-                    console.log("changeCheck", JSON.stringify(this.dataList));
-                    console.log("changeCheck", JSON.stringify(result));
-                    this.$emit('input', result);
+                    this.$emit('input', this.dataList);
                 })
-             
-            },
-            getCheckedList: function () {
-                let result = [];
-                this.dataList.forEach(item => {
-                    if (item.checked) {
-                        result.push(item.title);
-                    }
-                });
-                return result;
+
             },
             checkItem: function (index) {
-                let item = this.dataList[index];
-                item.checked = !item.checked;
-                this.$set(this.dataList, index, item);
-                this.$emit('input',this.getCheckedList())
+                if(this.value.indexOf(this.week[index]) > -1){
+                    //删除
+                    this.dataList.splice(this.dataList.indexOf(this.week[index]),1);
+                }else{
+                    this.dataList.push(this.week[index]);
+                }
+                this.$emit('input', this.dataList)
             }
         },
         mounted: function () {
-            this.init();
         }
     }
 </script>

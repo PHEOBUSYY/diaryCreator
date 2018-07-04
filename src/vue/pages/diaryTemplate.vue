@@ -1,18 +1,20 @@
 <!--日记模板-->
 <template>
-    <div class="container">
-        <nav>
-            <router-link to="/targetTemplate">
-                <a href="#">设置目标</a>
-            </router-link>
-        </nav>
-        <div class="section">
+    <div class="">
+        <div class="content">
+            <div class="ui breadcrumb ">
+                <a class="section labeled teal active">首页</a>
+                <div class="divider"> | </div>
+                <a class="section labeled teal " href="#" @click="$router.push({path: '/targetTemplate'})">
+                    目标
+                </a>
+            </div>
+        
             <diary-title ref="diary_title"></diary-title>
-            <h4>本周目标</h4>
-            <todayTarget ref="target"></todayTarget>
-            <diary_time_record ref="diary_time_record"></diary_time_record>
-            <diary_inspiration ref="diary_inspiration"></diary_inspiration>
             <diary_achievement ref="diary_achievement"></diary_achievement>
+            <diary_time_record ref="diary_time_record"></diary_time_record>
+            <diary_target ref="diary_target"></diary_target>
+            <diary_inspiration ref="diary_inspiration"></diary_inspiration>
             <diary_photos ref="diary_photos"></diary_photos>
             
             <button class="ui teal button make" @click="generate">make</button>
@@ -23,10 +25,7 @@
 
 </template>
 <script>
-    import htmlTableParser from './htmlTableParser.vue';
-    import todayTarget from './todayTarget.vue'
-    import todayEvent from './todayEvent.vue'
-    import todayFeeling from './todayFeeling.vue'
+    import diary_target from '../widget/diary_target.vue'
     import diaryTitle from '../widget/diary_title';
     import diary_time_record from '../widget/diary_time_record';
     import diary_inspiration from '../widget/diary_inspiration';
@@ -36,10 +35,7 @@
     export default {
         components: {
             Diary_photos,
-            htmlTableParser,
-            todayTarget,
-            todayEvent,
-            todayFeeling,
+            diary_target,
             diaryTitle,
             diary_time_record,
             diary_inspiration,
@@ -58,9 +54,10 @@
 
                 let refs = [];
                 refs.push(this.$refs.diary_title);
-                refs.push(this.$refs.diary_time_record);
-                refs.push(this.$refs.diary_inspiration);
                 refs.push(this.$refs.diary_achievement);
+                refs.push(this.$refs.diary_time_record);
+                refs.push(this.$refs.diary_target);
+                refs.push(this.$refs.diary_inspiration);
                 refs.push(this.$refs.diary_photos);
                 refs.forEach(item => {
                     result += item.parse();
@@ -79,14 +76,10 @@
     }
 </script>
 <style scoped lang="scss">
-    .container {
-    }
-    
-    .section {
+    .content {
         width: 50%;
         text-align: center;
         margin: 0 auto;
-        /*color: white;*/
     }
     
     .make {
