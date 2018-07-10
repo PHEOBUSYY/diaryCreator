@@ -14,6 +14,14 @@ import 'semantic-ui-css/semantic.js'
 import './css/index.scss'
 Vue.use(vueRouter);
 Vue.use(Vuex);
+if(global.electron){
+    Vue.use({
+        install (Vue, options) {
+            //添加实例方法
+            Vue.prototype.$electron = global.electron;
+        }
+    });
+}
 const router = new vueRouter({
     routes: Routes
 });

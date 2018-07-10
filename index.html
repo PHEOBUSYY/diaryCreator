@@ -6,7 +6,7 @@
           content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <title>Markdown Table Parser</title>
+    <title>日记生成器</title>
     <!-- built style files will be auto injected -->
     <!--<script type="text/javascript" src="cordova.js"></script>-->
     <!--<script type="text/javascript" src="cordova_plugins.js"></script>-->
@@ -15,6 +15,10 @@
 </head>
 <body>
 <div id="app"></div>
+<script>
+    // electron专用
+    require('../renderer.js')
+</script>
 <!-- built script files will be auto injected -->
 </body>
 </html>

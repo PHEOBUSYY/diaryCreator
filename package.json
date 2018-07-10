@@ -11,7 +11,8 @@
     "dev": "webpack-dev-server --devtool eval --progress --colors --hot --content-base ./src --config webpack.dev.js",
     "mockenv": "webpack-dev-server --devtool eval --progress --colors --hot --open --content-base ./src --config webpack.mock.js",
     "mock": "json-server --watch src/mock/db.json --routes src/mock/routes.json",
-    "mockdev": "npm run mock & npm run dev"
+    "mockdev": "npm run mock & npm run dev",
+    "electron": "npm run build && rm -rf ../electron-quick-start/www && cp -R www ../electron-quick-start/www"
   },
   "author": "Apache Cordova Team",
   "license": "Apache-2.0",
