@@ -42,15 +42,29 @@
         methods: {
             getTarget: function () {
                 let date = new Date();
-                let weekDay = date.getDay();
                 date.setDate(date.getDate() - date.getDay() + 1);
                 let key = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
                 console.log("key", key);
-                let cache = localStorage.getItem('target');
-                if (cache) {
-                    cache = JSON.parse(cache);
+                this.$electron.ipcRenderer.send('target', 'get', key);
+            },
+            generateSingleLine: function (prefix, item) {
+                //生成的单行格式
+                if (item.star) {
+                    return '- [ ] <font color=1cb5ac>' + prefix + '. ' + item.text + '</font>\r\n'
+                } else {
+                    return '- [ ] ' + prefix + '. ' + item.text + '\r\n'
+                }
+            },
+            parse: function () {
+                return this.output;
+            },
+            onGet: function (time, res) {
+                if (res) {
+                    //获取当前时间
+                    let date = new Date();
+                    let weekDay = date.getDay();
                     //取到了本周的计划列表
-                    let targetList = cache[key];
+                    let targetList = res.targets;
                     if (targetList && targetList.length > 0) {
                         let output = '\r\n';
                         output += '### 本周目标\r\n';
@@ -104,26 +118,24 @@
                         console.log("show", this.show);
                     }
                 }
-            },
-            generateSingleLine: function (prefix, item) {
-                //生成的单行格式
-                if (item.star) {
-                    return '- [ ] <font color=1cb5ac>' + prefix + '. ' + item.text + '</font>\r\n'
-                } else {
-                    return '- [ ] ' + prefix + '. ' + item.text + '\r\n'
-                }
-            },
-            parse: function () {
-                return this.output;
             }
         },
         mounted: function () {
+            this.$electron.ipcRenderer.on('targetRenderer', (event, method, time, res) => {
+                if (method === 'get') {
+                    this.onGet(time, res);
+                } else if (method === 'delete') {
+                    // this.onDelete(res);
+                } else if (method === 'create') {
+                    // this.onCreateOrUpdate(res);
+                }
+            });
             this.getTarget();
         }
     }
 </script>
 <style scoped lang="scss">
-.container {
-    padding: 15px;
-}
+    .container {
+        padding: 15px;
+    }
 </style> 

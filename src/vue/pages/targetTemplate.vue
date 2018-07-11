@@ -102,30 +102,10 @@
                 })
             },
             save: function () {
-                let cache = localStorage.getItem(this.storageKey);
-                if (this.targetList.length > 0) {
-                    if (!cache) {
-                        cache = {}
-                    } else {
-                        cache = JSON.parse(cache);
-                    }
-                    console.log("save realTime", this.realTime);
-                    cache[this.realTime] = this.targetList.filter(item => {
-                        return item.text;
-                    });
-                    localStorage.setItem(this.storageKey, JSON.stringify(cache));
-                    this.generateTemplate();
-                    this.$message({
-                        message: '保存成功',
-                        type: 'success'
-                    });
-                } else {
-                    this.$message({
-                        message: '目标不能为空',
-                        type: 'error'
-                    });
-                }
-
+                let realList = this.targetList.filter(item => {
+                    return item.text;
+                });
+                this.$electron.ipcRenderer.send('target', 'create', this.realTime, realList);
             },
             initEmpty: function () {
                 this.targetList = [];
@@ -135,30 +115,11 @@
                 this.generate = '';
             },
             clear: function () {
-                let cache = localStorage.getItem(this.storageKey);
-                if (cache) {
-                    cache = JSON.parse(cache);
-                    if (cache[this.realTime]) {
-                        delete cache[this.realTime];
-                    }
-                }
-                localStorage.setItem(this.storageKey, JSON.stringify(cache));
-                this.initEmpty();
+                this.$electron.ipcRenderer.send('target', 'delete', this.realTime);
             },
             timeChange: function () {
                 //切换时间
-                let cache = localStorage.getItem(this.storageKey);
-                if (cache) {
-                    console.log("get realTime", this.realTime);
-                    cache = JSON.parse(cache);
-                    if (cache[this.realTime]) {
-                        this.targetList = cache[this.realTime];
-                    } else {
-                        this.initEmpty();
-                    }
-                } else {
-                    this.initEmpty();
-                }
+                this.$electron.ipcRenderer.send('target', 'get', this.realTime);
 
             },
             generateSingleLine: function (prefix, item) {
@@ -204,12 +165,62 @@
                 }
                 console.log("generate result ", output);
                 this.generate = output;
+            },
+            onGet: function (res) {
+                console.log("onGet", res);
+                if(res){
+                    this.targetList = res.targets.map(item =>{
+                        return {
+                            text: item.text,
+                            star: item.star,
+                            editable: item.editable,
+                            type: item.type,
+                            week: item.week
+                        }
+                    });
+                    console.log("onGet", JSON.stringify(this.targetList));
+                }else{
+                    this.initEmpty();
+                }
+                this.generate = "";
+            },
+            onDelete: function (res) {
+                console.log("onDelete", res);
+                if(res){
+                    this.initEmpty();
+                }
+            },
+            onCreateOrUpdate: function (res) {
+                console.log("onCreateOrUpdate", res);
+                if(res){
+                    this.generateTemplate();
+                    this.$message({
+                        message: '保存成功',
+                        type: 'success'
+                    });
+                }else{
+                    this.$message({
+                        message: '目标不能为空',
+                        type: 'error'
+                    });
+                }
             }
 
         },
         mounted: function () {
             this.timeRange = new Date().toDateString();
             this.timeChange();
+            this.$electron.ipcRenderer.on('targetRenderer', (event, method, time, res) => {
+                console.log("targetRenderer", method,time, res);
+                if(method === 'get'){
+                    console.log("ipcRenderer get", JSON.stringify(res));
+                    this.onGet(res);
+                }else if (method === 'delete'){
+                    this.onDelete(res);
+                }else if (method === 'create'){
+                    this.onCreateOrUpdate(res);
+                }
+            })
         }
     };
 </script>
