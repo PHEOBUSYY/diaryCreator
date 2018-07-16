@@ -85,6 +85,12 @@
                 date.setDate(date.getDate() - date.getDay() + 1);
                 return date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
             },
+            realTimeEnd: function(){
+                let date = new Date(this.timeRange);
+                date.setDate(date.getDate() - date.getDay() + 1);
+                date.setDate(date.getDate() + 6);
+                return date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
+            },
             realData: function () {
                 return this.targetList.filter(item => {
                     return item.text;
@@ -131,25 +137,33 @@
                 }
             },
             generateTemplate: function () {
+                let output = '';
                 let result = [];
+                output += '## 每周目标'+ this.realTime.replace('-','') + "-" + this.realTimeEnd.replace('-','');
+                output += '\r\n';
+                let index = 1;
                 this.targetList.forEach(item => {
-                    if (item.week && item.week.length > 0) {
-                        item.week.forEach(weekDay => {
-                            let index = this.weekDays.indexOf(weekDay);
-                            if (!result[index]) {
-                                result[index] = [];
+                    if(item && item.text){
+                        output += this.generateSingleLine(index, item);
+                        index ++;
+                        if (item.week && item.week.length > 0) {
+                            item.week.forEach(weekDay => {
+                                let index = this.weekDays.indexOf(weekDay);
+                                if (!result[index]) {
+                                    result[index] = [];
+                                }
+                                result[index].push(this.generateSingleLine(result[index].length + 1, item));
+                            })
+                        } else {
+                            let othersIndex = this.weekDays.length;
+                            if (!result[othersIndex]) {
+                                result[othersIndex] = [];
                             }
-                            result[index].push(this.generateSingleLine(result[index].length + 1, item));
-                        })
-                    } else {
-                        let othersIndex = this.weekDays.length;
-                        if (!result[othersIndex]) {
-                            result[othersIndex] = [];
+                            result[othersIndex].push(this.generateSingleLine(result[othersIndex].length + 1, item));
                         }
-                        result[othersIndex].push(this.generateSingleLine(result[othersIndex].length + 1, item));
                     }
                 });
-                let output = '';
+                output += "\r\n";
                 for (let i = 0; i < result.length; i++) {
                     let alias = '其他';
                     if (i < this.weekDays.length) {
@@ -167,7 +181,6 @@
                 this.generate = output;
             },
             onGet: function (res) {
-                console.log("onGet", res);
                 if(res){
                     this.targetList = res.targets.map(item =>{
                         return {
@@ -178,20 +191,17 @@
                             week: item.week
                         }
                     });
-                    console.log("onGet", JSON.stringify(this.targetList));
                 }else{
                     this.initEmpty();
                 }
                 this.generate = "";
             },
             onDelete: function (res) {
-                console.log("onDelete", res);
                 if(res){
                     this.initEmpty();
                 }
             },
             onCreateOrUpdate: function (res) {
-                console.log("onCreateOrUpdate", res);
                 if(res){
                     this.generateTemplate();
                     this.$message({
