@@ -58,7 +58,9 @@
                 let date = new Date(this.date);
                 date.setDate(date.getDate() - date.getDay() + 1);
                 let key = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
-                this.$electron.ipcRenderer.send('target', 'get', key);
+                if(this.$electron){
+                    this.$electron.ipcRenderer.send('target', 'get', key);
+                }
             },
             generateSingleLine: function (prefix, item) {
                 //生成的单行格式
@@ -72,7 +74,7 @@
                 return this.output;
             },
             onGet: function (time, res) {
-                console.log("diary_target renderer get", res);
+                // console.log("diary_target renderer get", res);
                 if (res) {
                     //获取当前时间
                     let date = new Date(this.date);
@@ -130,19 +132,22 @@
                         // console.log("output", output);
                     }
                 }
+            },
+            onRenderer: function () {
+                this.$electron.ipcRenderer.on('targetRenderer', (event, method, time, res) => {
+                    if (method === 'get') {
+                        this.onGet(time, res);
+                    } else if (method === 'delete') {
+                    } else if (method === 'create') {
+                    }
+                });
             }
         },
         mounted: function () {
-            this.$electron.ipcRenderer.on('targetRenderer', (event, method, time, res) => {
-                if (method === 'get') {
-                    this.onGet(time, res);
-                } else if (method === 'delete') {
-                    // this.onDelete(res);
-                } else if (method === 'create') {
-                    // this.onCreateOrUpdate(res);
-                }
-            });
-            this.getTarget();
+            if(this.$electron){
+                this.onRenderer();
+                this.getTarget();
+            }
         }
     }
 </script>

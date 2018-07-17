@@ -18,6 +18,7 @@
         components: {Diary_section_header, S_input_group},
         data: function () {
             return {
+                title: '',
                 dataList: [],
                 initLength: 3,
                 originObj: {
@@ -33,16 +34,13 @@
           }
         },
         watch: {
-          realTime: function (newVal, oldVal) {
+            date: function (newVal, oldVal) {
               if (newVal !== oldVal) {
                   this.initData();
               }
           }
         },
         computed: {
-            realTime: function () {
-                return this.date;
-            },
             styleOption: function () {
                 return [{
                     fluid: true,
@@ -76,18 +74,21 @@
                 return result;
             },
             save: function () {
-                this.$electron.ipcRenderer.send(ipcKey, {
-                    method: 'create',
-                    time: this.realTime,
-                    type: this.type,
-                    data: this.dataList.filter(item => {
-                        return item.value;
-                    }).map(item => {
-                        return {
-                            value: item.value
-                        }
-                    })
-                });
+                if(this.$electron){
+                    this.$electron.ipcRenderer.send(ipcKey, {
+                        method: 'create',
+                        time: this.date,
+                        type: this.type,
+                        data: this.dataList.filter(item => {
+                            return item.value;
+                        }).map(item => {
+                            return {
+                                value: item.value
+                            }
+                        })
+                    });
+                }
+              
             },
             wrap: function (obj,option) {
                 //包裹数据库对象+样式对象
@@ -96,14 +97,10 @@
                 });
                 return obj;
             },
-            unWrap: function(wrap){
-                let obj = {};
-                Object.keys(this.originObj).forEach(key => {
-                    obj[key] = wrap[key];
-                });
-                return obj;
-            },
             onRenderer: function () {
+                if(!this.$electron){
+                    return;
+                }
                 this.$electron.ipcRenderer.on(rendererKey, (event, args, res) => {
                     let method = args.method;
                     let type = args.type;
@@ -121,7 +118,7 @@
             },
             onGet: function (res) {
                 this.dataList = [];
-                console.log("diary_dbhelper renderer get", res);
+                // console.log("diary_dbhelper renderer get", res);
                 if (res && res.data && res.data.length > 0) {
                     for (let i =0 ;i< res.data.length ;i ++){
                         let item = res.data[i];
@@ -139,6 +136,7 @@
                 }
             },
             initDefault: function () {
+                this.dataList = [];
                 for (let i = 0; i < this.initLength; i++) {
                     let obj = {value: ""};
                     let option = {};
@@ -154,7 +152,7 @@
                 if (this.$electron) {
                     this.$electron.ipcRenderer.send(ipcKey, {
                         method: 'get',
-                        time: this.realTime,
+                        time: this.date,
                         type: this.type,
                     });
                 } else {

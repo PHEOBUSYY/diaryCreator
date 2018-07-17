@@ -4,15 +4,15 @@
             <div class="text"></div>
             <i class="dropdown icon"></i>
         </div>
-        <el-time-select style="width: 100px" :picker-options="pickOption" title="input"
-                        v-model="realData.start"
+        <el-time-select style="width: 100px" :picker-options="pickRange" title="input"
+                        v-model="value.start"
                         @change="dataChange(0)"
         />
-        <el-time-select style="width: 100px" :picker-options="pickOption" title="input"
-                        v-model="realData.end"
+        <el-time-select style="width: 100px" :picker-options="pickRange" title="input"
+                        v-model="value.end"
                         @change="dataChange(1)"
         />
-        <el-input @blur="dataChange" style="width: 100px" v-model="realData.remark"></el-input>
+        <el-input style="width: 100px" v-model="value.remark"></el-input>
         <div v-if="rLabel" class="ui basic label">{{rLabel}}</div>
     </div>
 </template>
@@ -20,14 +20,11 @@
 <script>
     export default {
         name: "s_input",
-        components:{
-        },
+        components: {},
         data: function () {
             return {
-                pickOption: this.pickRange,
                 eventOption: [],
                 time: "",
-                realData: this.data
             }
         },
         props: {
@@ -58,7 +55,7 @@
                 default: '',
                 required: true
             },
-            data: {
+            value: {
                 type: Object,
                 default: function () {
                     return {
@@ -71,9 +68,11 @@
                 required: false
             },
             pickRange: {
-                type:Object,
-                default: {
-                    start: '05:00', step: '00:10', end: '23:30'
+                type: Object,
+                default: function () {
+                    return {
+                        start: '05:00', step: '00:10', end: '23:30'
+                    }
                 }
             }
         },
@@ -100,7 +99,7 @@
                         values.push({
                             name: this.event[i],
                             value: i + "",//这里必须是字符串
-                            selected: i === this.selected
+                            selected: this.event[i] === this.value.event ? this.event[i] === this.value.event  :  i === this.selected
 
                         })
                     }
@@ -113,7 +112,7 @@
             // timeOptionEnd: function(){
             //     return this.realData.start;
             // },
-            
+
         },
         // watch: {
         //     timeOptionStart: function (newData) {
@@ -124,25 +123,26 @@
         // },
         methods: {
             dataChange: function (index) {
-                if(!this.realData.start){
-                    this.realData.start = '';
-                }
-                if(!this.realData.end){
-                    this.realData.end = '';
-                }
-                if(!this.realData.remark){
-                    this.realData.remark = '';
-                }
-                this.$emit('timeChange', this.realData);
+                // if (!this.realData.start) {
+                //     this.realData.start = '';
+                // }
+                // if (!this.realData.end) {
+                //     this.realData.end = '';
+                // }
+                // if (!this.realData.remark) {
+                //     this.realData.remark = '';
+                // }
+                // this.$emit('input',this.value);
+                this.$emit('timeChange', this.value);
             },
             dropdownInit: function () {
                 let dropdown = $('#' + this.id);
                 dropdown.dropdown({
                     transition: 'drop',
                     values: this.dropdownEvent,
-                    onChange: (value, text) =>{
+                    onChange: (value, text) => {
                         //监听选中
-                        this.realData.event = text;
+                        this.value.event = text;
                         this.dataChange();
                     }
                 })
