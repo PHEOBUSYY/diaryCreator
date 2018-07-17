@@ -121,6 +121,7 @@
             },
             onGet: function (res) {
                 this.dataList = [];
+                console.log("diary_dbhelper renderer get", res);
                 if (res && res.data && res.data.length > 0) {
                     for (let i =0 ;i< res.data.length ;i ++){
                         let item = res.data[i];

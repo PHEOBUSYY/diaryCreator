@@ -72,6 +72,7 @@
                 return this.output;
             },
             onGet: function (time, res) {
+                console.log("diary_target renderer get", res);
                 if (res) {
                     //获取当前时间
                     let date = new Date(this.date);
@@ -84,8 +85,8 @@
                         for (let i = 0; i < targetList.length; i++) {
                             targetList[i].output = this.generateSingleLine(i + 1, targetList[i]);
                             output += targetList[i].output;
-                            this.weekTarget.push(targetList[i]);
                         }
+                        this.weekTarget = targetList;
                         output += '\r\n';
                         let result = [];
                         targetList.forEach(item => {
