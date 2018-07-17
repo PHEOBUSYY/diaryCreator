@@ -1,47 +1,31 @@
-<template>
-    <div class="container">
-        <diary_section_header title="标题"></diary_section_header>
-        <s_input_group :dataList="dataList"></s_input_group>
-    </div>
-</template>
-
 <script>
-    import S_input_group from "./semantic/s_input_group";
-    import Diary_section_header from "./diary_section_header";
-
+    import diary_dbhelper from './diary_dbhelper'
+    const title = '标题';
+    const labelArray = ['今日标题', '每日金句', '个人点评'];
+    const placeholderArray = ['请输入标题', '请输入名言名句', '请输入个人点评'];
     export default {
-        name: "diary_title",
-        components: {
-            Diary_section_header,
-            S_input_group,
-        },
+        mixins:[diary_dbhelper],
         data: function () {
             return {
-                dataList: [
-                    {
-                        value: '',
-                        fluid: true,
-                        color: 'teal',
-                        label: '今日标题',
-                        placeholder: '请输入标题'
-                    },
-                    {
-                        value: '',
-                        fluid: true,
-                        color: 'teal',
-                        label: '名言名句',
-                        placeholder: '请输入名言名句'
-                    },
-                    {
-                        value: '',
-                        fluid: true,
-                        color: 'teal',
-                        label: '个人点评',
-                        placeholder: '请输入个人点评'
-                    }
-                ],
+                dataList: [],
+                title: title,
+                type: 4,
                 weekDays: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
             }
+        },
+        computed: {
+            styleOption: function () {
+                let result = [];
+                for(let i = 0 ; i < labelArray.length;i++){
+                    result.push({
+                        fluid: true,
+                        color: 'teal',
+                        label: labelArray[i],
+                        placeholder: placeholderArray[i]
+                    })
+                }
+                return result;
+            },
         },
         methods: {
             createDefaultTitle: function () {
@@ -49,6 +33,7 @@
                 return this.weekDays[date.getDay() - 1];
             },
             parse: function () {
+                this.save();
                 let result = '\n';
                 if (this.dataList.length > 0) {
                     for (let i = 0; i < this.dataList.length; i++) {
@@ -67,11 +52,5 @@
             }
         }
     }
+    
 </script>
-
-<style scoped lang="scss">
-    .container {
-        padding: 15px;
-    }
-
-</style>

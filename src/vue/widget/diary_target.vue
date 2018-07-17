@@ -39,12 +39,25 @@
                 show: ''
             }
         },
+        props: {
+            date:{
+                type: String,
+                default: '',
+                required: true
+            }
+        },
+        watch: {
+          date: function (newVal, oldVal) {
+              if (newVal !== oldVal) {
+                  this.getTarget();
+              }
+          }
+        },
         methods: {
             getTarget: function () {
-                let date = new Date();
+                let date = new Date(this.date);
                 date.setDate(date.getDate() - date.getDay() + 1);
                 let key = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
-                console.log("key", key);
                 this.$electron.ipcRenderer.send('target', 'get', key);
             },
             generateSingleLine: function (prefix, item) {
@@ -61,7 +74,7 @@
             onGet: function (time, res) {
                 if (res) {
                     //获取当前时间
-                    let date = new Date();
+                    let date = new Date(this.date);
                     let weekDay = date.getDay();
                     //取到了本周的计划列表
                     let targetList = res.targets;
@@ -93,7 +106,6 @@
                                 result[othersIndex].push(item);
                             }
                         });
-                        console.log("result", result);
                         output += '### 今日目标\r\n';
                         if (result[weekDay]) {
                             result[weekDay].forEach(item => {
@@ -114,8 +126,7 @@
                         output += '\r\n';
                         this.output = output;
                         this.show = output.replace(/\r\n/g, '<br>').replace(/\- \[ \] /g, '').replace(/### /g, '');
-                        console.log("output", output);
-                        console.log("show", this.show);
+                        // console.log("output", output);
                     }
                 }
             }

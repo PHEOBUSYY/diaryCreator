@@ -177,7 +177,7 @@
                     }
                     output += '\r\n';
                 }
-                console.log("generate result ", output);
+                // console.log("generate result ", output);
                 this.generate = output;
             },
             onGet: function (res) {
@@ -221,9 +221,8 @@
             this.timeRange = new Date().toDateString();
             this.timeChange();
             this.$electron.ipcRenderer.on('targetRenderer', (event, method, time, res) => {
-                console.log("targetRenderer", method,time, res);
                 if(method === 'get'){
-                    console.log("ipcRenderer get", JSON.stringify(res));
+                    // console.log("ipcRenderer get", JSON.stringify(res));
                     this.onGet(res);
                 }else if (method === 'delete'){
                     this.onDelete(res);

@@ -10,18 +10,22 @@
                     目标
                 </a>
             </div>
+            <div class="date">
+                <a class="section labeled teal active" @click="changeDate"><</a>
+                <a class="section labeled teal active" @click="changeDate3"><span>{{date}}</span></a>
+                <a class="section labeled teal active" @click="changeDate2">></a>
+            </div>
+            <diary-title :date="date" ref="diary_title"></diary-title>
+            <diary_achievement :date="date" ref="diary_achievement"></diary_achievement>
+            <diary_time_record :date="date" ref="diary_time_record"></diary_time_record>
+            <diary_target :date="date" ref="diary_target"></diary_target>
+            <diary_inspiration :date="date" ref="diary_inspiration"></diary_inspiration>
+            <diary_photos :date="date" ref="diary_photos"></diary_photos>
             
-            <diary-title ref="diary_title"></diary-title>
-            <diary_achievement ref="diary_achievement"></diary_achievement>
-            <diary_time_record ref="diary_time_record"></diary_time_record>
-            <diary_target ref="diary_target"></diary_target>
-            <diary_inspiration ref="diary_inspiration"></diary_inspiration>
-            <diary_photos ref="diary_photos"></diary_photos>
-            
-            <button class="ui teal button" @click="generate">make</button>
-            <button class="ui teal button " @click="ipcTest">ipcTest</button>
+            <button class="ui teal button make" @click="generate">make</button>
             <el-input v-if="output" ref="output" type="textarea" autosize
                       v-model="output"></el-input>
+        
         </div>
     </div>
 
@@ -45,11 +49,10 @@
         },
         data: function () {
             return {
-                output: ''
-
+                output: '',
+                date: new Date().toLocaleDateString()
             }
         },
-        props: {},
         methods: {
             generate: function () {
                 let result = '';
@@ -66,14 +69,28 @@
                 });
                 console.log("result", result);
                 this.output = result;
-                this.$nextTick(() => {
-                    this.$refs.output.select();
-                    document.execCommand("Copy");
-                    navigator.clipboard.writeText(this.output);
-                });
+                try {
+                    if (this.$refs.output) this.$refs.output.select();
+                    // document.execCommand("Copy");
+                    if(this.$electron){
+                        this.$electron.clipboard.writeText(this.output);
+                    }
+                } catch (e) {
+                    console.log(e);
+                }
             },
-            ipcTest: function () {
-                this.$electron.ipcRenderer.send('target', 'yanyi456');
+            changeDate: function () {
+                let date = new Date(this.date);
+                date.setDate(date.getDate() - 1);
+                this.date = date.toLocaleDateString();
+            },
+            changeDate2: function () {
+                let date = new Date(this.date);
+                date.setDate(date.getDate() + 1);
+                this.date = date.toLocaleDateString();
+            },
+            changeDate3: function () {
+                this.date = new Date().toLocaleDateString();
             }
         },
         mounted: function () {
@@ -89,6 +106,15 @@
     
     .make {
         margin: 40px;
-        width: 80%;
+    }
+    
+    .date {
+        margin: 40px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 10px;
+        cursor: pointer;
+        font-size: 16px;
     }
 </style>

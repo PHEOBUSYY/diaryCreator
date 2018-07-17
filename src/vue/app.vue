@@ -78,12 +78,10 @@
         },
         methods: {
             showModal: function () {
-                alert('123');
                 $('.ui.modal').modal('show');
             }
         },
         mounted: function () {
-            console.log("model", JSON.stringify($('.ui.modal')));
 
         }
     }

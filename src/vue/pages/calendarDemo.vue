@@ -142,7 +142,6 @@
             createData: function () {
                 let param_start = util.format(this.days[0],true);
                 let param_end = util.format(this.days[41],true);
-                console.log("start and end", param_start, param_end);
                 let json = mock_calendar;
                 let list = this.filterAndFormatEvent(json);
                 this.realData = this.renderEvent(list);
@@ -160,7 +159,6 @@
                 return (100 / 7 * range) + "%";
             },
             getTop: function (startDate, order) {
-                // console.log("getTop", startDate, order);
                 return (order * (this.eventItemHeight + this.eventItemDivide)) + "px";
             },
             parseClass: function (type) {
@@ -253,7 +251,6 @@
             eventClick: function (item) {
                 this.dialogVisible = true;
                 this.curEvent = item;
-                console.log("click event", item);
             },
             changePickMode: function () {
                 this.pickMode = true;
