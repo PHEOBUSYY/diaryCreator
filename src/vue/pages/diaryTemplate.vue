@@ -23,8 +23,8 @@
             <diary_photos :date="date" ref="diary_photos"></diary_photos>
             
             <button class="ui teal button make" @click="generate">make</button>
-            <el-input v-if="output" ref="output" type="textarea" autosize
-                      v-model="output"></el-input>
+            <!--<el-input v-if="output" ref="output" type="textarea" autosize-->
+                      <!--v-model="output"></el-input>-->
         
         </div>
     </div>
@@ -70,11 +70,16 @@
                 console.log("result", result);
                 this.output = result;
                 try {
-                    if (this.$refs.output) this.$refs.output.select();
-                    // document.execCommand("Copy");
+                    // if (this.$refs.output) this.$refs.output.select();
                     if(this.$electron){
                         this.$electron.clipboard.writeText(this.output);
+                    }else{
+                        document.execCommand("Copy");
                     }
+                    this.$message({
+                        message: '内容已成功粘贴到剪切板',
+                        type: 'success'
+                    });
                 } catch (e) {
                     console.log(e);
                 }

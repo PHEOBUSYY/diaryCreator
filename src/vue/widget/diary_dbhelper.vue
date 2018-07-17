@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <diary_section_header :title="title"></diary_section_header>
-        <s_input_group show-add :dataList="dataList" @addNewLine="addNewLine"></s_input_group>
+        <s_input_group :showAdd="showAdd" :dataList="dataList" @addNewLine="addNewLine"></s_input_group>
         <!--<button @click="save" class="ui teal basic button mini" style="margin-top: 5px">save-->
         <!--</button>-->
     </div>
@@ -23,7 +23,8 @@
                 initLength: 3,
                 originObj: {
                     value: ''//原始对象
-                }
+                },
+                showAdd: true
             }
         },
         props: {

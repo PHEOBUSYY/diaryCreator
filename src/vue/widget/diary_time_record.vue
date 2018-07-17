@@ -22,8 +22,8 @@
         <button v-if="dataList.length>0 && dataList[dataList.length - 1].end" @click="addNewLine"
                 class="ui teal basic button mini" style="margin-top: 5px">add
         </button>
-        <button @click="parse" class="ui teal basic button mini" style="margin-top: 5px">save
-        </button>
+        <!--<button @click="parse" class="ui teal basic button mini" style="margin-top: 5px">save-->
+        <!--</button>-->
     </div>
 </template>
 
