@@ -43,7 +43,7 @@
         data: function () {
             return {
                 tabs: ['全部', '锻炼', '常规', '编程', '加班'],
-                events: [['起床', '跑步', '去黑山', '看孩子', '开车', '吃饭', '读书', '总结', '工作', '编程', '阅读', '写作', '其他'],
+                events: [['起床', '跑步', '去黑山', '看孩子', '开车', '吃饭', '读书', '总结', '工作', '编程', '阅读', '写作', '其他','游戏','上网'],
                     ['起床', '跑步', '吃饭', '去黑山', '开车', '工作', '吃饭', '午休', '工作', '总结'],
                     ['起床', '去黑山', '开车', '吃饭', '工作', '吃饭', '午休', '工作', '总结'],
                     ['起床', '去黑山', '开车', '吃饭', '编程', '吃饭', '午休', '编程', '总结'],
@@ -137,21 +137,28 @@
             updateTime: function (index, args) {
                 let itemData = args[0];//当前行对象
                 this.$set(this.dataList, index, itemData);
+                if(itemData.end){
+                    this.$set(this.pickRange, 'start', itemData.end);
+                }else if (itemData.start) {
+                    this.$set(this.pickRange, 'start', itemData.start);
+                }
                 if (index < this.dataList.length - 1) {
                     //把当前行的end时间设置为下一行的start
                     let nextData = this.dataList[index + 1];
                     nextData.start = itemData.end;
                     this.$set(this.dataList, index + 1, nextData);
                     //todo 待优化
-                    if(itemData.end){
-                        this.$set(this.pickRange, 'start', itemData.end);
-                    }else{
-                        //清空
-                        this.$set(this.pickRange, 'start', '05:00');
-                    }
+                    // if(this.dataList[index].end){
+                    //     this.$set(this.pickRange, 'start', itemData.end);
+                    // }else{
+                    //     //清空
+                    //     this.$set(this.pickRange, 'start', '05:00');
+                    // }
                 }
             },
             initData: function () {
+                //恢复时间间隔
+                this.$set(this.pickRange, 'start', '05:00');
                 if (this.$electron) {
                     this.$electron.ipcRenderer.send(ipcKey, {
                         method: 'get',
