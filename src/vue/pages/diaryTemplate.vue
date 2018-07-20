@@ -12,7 +12,8 @@
             </div>
             <div class="date">
                 <a class="section labeled teal active" @click="changeDate"><</a>
-                <a class="section labeled teal active" @click="changeDate3"><span>{{date}}</span></a>
+                <a class="section labeled teal active"
+                   @click="changeDate3"><span>{{date}}</span></a>
                 <a class="section labeled teal active" @click="changeDate2">></a>
             </div>
             <diary-title :date="date" ref="diary_title"></diary-title>
@@ -24,7 +25,7 @@
             
             <button class="ui teal button make" @click="generate">make</button>
             <!--<el-input v-if="output" ref="output" type="textarea" autosize-->
-                      <!--v-model="output"></el-input>-->
+            <!--v-model="output"></el-input>-->
         
         </div>
     </div>
@@ -50,34 +51,67 @@
         data: function () {
             return {
                 output: '',
-                date: new Date().toLocaleDateString()
+                date: new Date().toLocaleDateString(),
+                
             }
         },
         methods: {
-            generate: function () {
+            //组件内容是否变化
+            isContentChange: function(){
+            
+            },
+            //isAuto 是否为自动保存
+            generate: function (isAuto) {
                 let result = '';
-
+                let diary_title = this.$refs.diary_title;
+                let diary_achievement = this.$refs.diary_achievement;
+                let diary_time_record = this.$refs.diary_time_record;
+                let diary_target = this.$refs.diary_target;
+                let diary_inspiration = this.$refs.diary_inspiration;
+                let diary_photos = this.$refs.diary_photos;
                 let refs = [];
-                refs.push(this.$refs.diary_title);
-                refs.push(this.$refs.diary_achievement);
-                refs.push(this.$refs.diary_time_record);
-                refs.push(this.$refs.diary_target);
-                refs.push(this.$refs.diary_inspiration);
-                refs.push(this.$refs.diary_photos);
+                refs.push(diary_title);
+                refs.push(diary_achievement);
+                refs.push(diary_time_record);
+                refs.push(diary_target);
+                refs.push(diary_inspiration);
+                refs.push(diary_photos);
+                //这些组件中必须包含两个方法： parse和isChange
+                let isChange = false;
                 refs.forEach(item => {
-                    result += item.parse();
+                    if(item !== diary_target && item.isChange()){
+                        isChange = true;
+                    }
                 });
-                console.log("result", result);
-                this.output = result;
+                let msg = '';
+                if(isAuto && isChange){
+                    refs.forEach(item => {
+                        result += item.parse();
+                    });
+                    this.output = result;
+                    // console.log("result", result);
+                    msg = '内容已自动保存';
+                    this.showMessage(msg)
+                } else if(!isAuto){
+                    refs.forEach(item => {
+                        result += item.parse();
+                    });
+                    this.output = result;
+                    msg = '内容已成功粘贴到剪切板';
+                    this.showMessage(msg)
+                }else{
+                
+                }
+            },
+            showMessage: function(msg){
                 try {
-                    // if (this.$refs.output) this.$refs.output.select();
-                    if(this.$electron){
+                    if (this.$electron) {
                         this.$electron.clipboard.writeText(this.output);
-                    }else{
+                    } else {
                         document.execCommand("Copy");
                     }
                     this.$message({
-                        message: '内容已成功粘贴到剪切板',
+                        message: msg,
                         type: 'success'
                     });
                 } catch (e) {
@@ -99,6 +133,14 @@
             }
         },
         mounted: function () {
+            if (this.$electron) {
+                this.$electron.ipcRenderer.on('schedule', (event, args) => {
+                    //日程，接收到日程的通知后，自动保存
+                    if (args === 'autosave') {
+                        this.generate(true);
+                    }
+                });
+            }
         }
     }
 </script>

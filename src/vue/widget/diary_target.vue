@@ -40,25 +40,25 @@
             }
         },
         props: {
-            date:{
+            date: {
                 type: String,
                 default: '',
                 required: true
             }
         },
         watch: {
-          date: function (newVal, oldVal) {
-              if (newVal !== oldVal) {
-                  this.getTarget();
-              }
-          }
+            date: function (newVal, oldVal) {
+                if (newVal !== oldVal) {
+                    this.getTarget();
+                }
+            }
         },
         methods: {
             getTarget: function () {
                 let date = new Date(this.date);
                 date.setDate(date.getDate() - date.getDay() + 1);
                 let key = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
-                if(this.$electron){
+                if (this.$electron) {
                     this.$electron.ipcRenderer.send('target', 'get', key);
                 }
             },
@@ -72,6 +72,9 @@
             },
             parse: function () {
                 return this.output;
+            },
+            isChange: function(){
+                return false;
             },
             onGet: function (time, res) {
                 // console.log("diary_target renderer get", res);
@@ -144,7 +147,7 @@
             }
         },
         mounted: function () {
-            if(this.$electron){
+            if (this.$electron) {
                 this.onRenderer();
                 this.getTarget();
             }

@@ -15,6 +15,7 @@ import './css/index.scss'
 Vue.use(vueRouter);
 Vue.use(Vuex);
 if(global.electron){
+    //添加electron实例
     Vue.use({
         install (Vue, options) {
             //添加实例方法

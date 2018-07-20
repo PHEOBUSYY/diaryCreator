@@ -38,41 +38,37 @@
         name: "diary_time_record",
         components: {
             Diary_section_header,
-            s_input,s_time_record_input
+            s_input, s_time_record_input
         },
         data: function () {
             return {
                 tabs: ['全部', '锻炼', '常规', '编程', '加班'],
-                events: [['起床', '跑步', '去黑山', '看孩子', '开车', '吃饭', '读书', '总结', '工作', '编程', '阅读', '写作', '其他','游戏','上网'],
+                events: [['起床', '跑步', '去黑山', '看孩子', '开车', '吃饭', '读书', '总结', '工作', '编程', '阅读', '写作', '其他', '游戏', '上网'],
                     ['起床', '跑步', '吃饭', '去黑山', '开车', '工作', '吃饭', '午休', '工作', '总结'],
                     ['起床', '去黑山', '开车', '吃饭', '工作', '吃饭', '午休', '工作', '总结'],
                     ['起床', '去黑山', '开车', '吃饭', '编程', '吃饭', '午休', '编程', '总结'],
                     ['起床', '去黑山', '开车', '吃饭', '编程', '吃饭', '午休', '编程', '吃饭', '加班']],
                 current: 0,
                 dataList: [],
-                pickRange:  {
+                pickRange: {
                     start: '05:00', step: '00:10', end: '23:30'
-                }
+                },
+                parseResult: ''
+
             }
         },
         watch: {
-            // dataList: {
-            //     handler: function (newVal, oldVal) {
-            //         console.log("parent watch dataList ", JSON.stringify(this.dataList));
-            //     },
-            //     deep: true
-            // },
             date: function (newVal, oldVal) {
-                if(newVal !== oldVal){
+                if (newVal !== oldVal) {
                     this.initData();
                 }
             }
         },
         props: {
-          date : {
-              type: String,
-              default: new Date().toLocaleDateString()
-          }
+            date: {
+                type: String,
+                default: new Date().toLocaleDateString()
+            }
         },
         methods: {
             parse: function () {
@@ -90,56 +86,58 @@
                     }
                 });
                 result += '\n';
-                // console.log("parse result", result);
                 return result;
             },
+            isChange: function () {
+                return this.parseResult !== JSON.stringify(this.dataList);
+            },
             save: function () {
-                if(this.$electron){
-                    this.$electron.ipcRenderer.send(ipcKey, {
-                        method: 'create',
-                        time: this.date,
-                        data: this.dataList.filter(item =>{
-                            return item.start && item.end;
-                        }).map(item => {
-                            return {
-                                start: item.start,
-                                end: item.end,
-                                event: item.event,
-                                remark: item.remark
-                            }
-                        })
-                    });
+                if (this.isChange()) {
+                    if (this.$electron) {
+                        this.$electron.ipcRenderer.send(ipcKey, {
+                            method: 'create',
+                            time: this.date,
+                            data: this.dataList.map(item => {
+                                return {
+                                    start: item.start,
+                                    end: item.end,
+                                    event: item.event,
+                                    remark: item.remark
+                                }
+                            })
+                        });
+                    }
+                    this.parseResult = JSON.stringify(this.dataList);
                 }
-                
-                
             },
             onGet: function (res) {
-                if(res){
+                if (res) {
                     this.dataList = res.data;
-                }else{
+                } else {
                     this.initDefault();
                 }
             },
             onRenderer: function () {
-                if(!this.$electron){
+                if (!this.$electron) {
                     return;
                 }
                 this.$electron.ipcRenderer.on(rendererKey, (event, args, res) => {
                     let method = args.method;
-                        if (method === 'get') {
-                            this.onGet(res);
-                        } else if (method === 'delete') {
-                        } else if (method === 'create') {
-                        }
+                    if (method === 'get') {
+                        this.onGet(res);
+                    } else if (method === 'delete') {
+                    } else if (method === 'create') {
+                    }
 
                 })
             },
             updateTime: function (index, args) {
                 let itemData = args[0];//当前行对象
                 this.$set(this.dataList, index, itemData);
-                if(itemData.end){
+                //调整时间选择的范围
+                if (itemData.end) {
                     this.$set(this.pickRange, 'start', itemData.end);
-                }else if (itemData.start) {
+                } else if (itemData.start) {
                     this.$set(this.pickRange, 'start', itemData.start);
                 }
                 if (index < this.dataList.length - 1) {
@@ -147,13 +145,6 @@
                     let nextData = this.dataList[index + 1];
                     nextData.start = itemData.end;
                     this.$set(this.dataList, index + 1, nextData);
-                    //todo 待优化
-                    // if(this.dataList[index].end){
-                    //     this.$set(this.pickRange, 'start', itemData.end);
-                    // }else{
-                    //     //清空
-                    //     this.$set(this.pickRange, 'start', '05:00');
-                    // }
                 }
             },
             initData: function () {
@@ -182,9 +173,9 @@
             addNewLine: function () {
                 //设置时间
                 let start = '';
-                if(this.dataList.length > 0 ){
+                if (this.dataList.length > 0) {
                     let temp = this.dataList[this.dataList.length - 1];
-                    if(temp.end){
+                    if (temp.end) {
                         start = temp.end;
                         this.$set(this.pickRange, 'start', start);
                     }
