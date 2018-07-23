@@ -123,17 +123,7 @@
         // },
         methods: {
             dataChange: function (index) {
-                // if (!this.realData.start) {
-                //     this.realData.start = '';
-                // }
-                // if (!this.realData.end) {
-                //     this.realData.end = '';
-                // }
-                // if (!this.realData.remark) {
-                //     this.realData.remark = '';
-                // }
-                // this.$emit('input',this.value);
-                this.$emit('timeChange', this.value);
+                this.$emit('timeChange', this.value, index);
             },
             dropdownInit: function () {
                 let dropdown = $('#' + this.id);

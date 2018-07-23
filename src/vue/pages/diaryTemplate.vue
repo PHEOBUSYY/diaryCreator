@@ -89,26 +89,30 @@
                     }
                 });
                 let msg = '';
-                if(isAuto && isChange && !isEmpty){
-                    refs.forEach(item => {
-                        result += item.parse();
-                    });
-                    this.output = result;
-                    msg = '内容已自动保存';
-                    this.showMessage(msg)
-                }
-                if(!isAuto && !isEmpty){
-                    refs.forEach(item => {
-                        result += item.parse();
-                    });
-                    this.output = result;
-                    msg = '内容已成功粘贴到剪切板';
-                    this.showMessage(msg)
+                if(isAuto){
+                    //自动保存
+                    if(!isEmpty && isChange){
+                        refs.forEach(item => {
+                            result += item.parse();
+                        });
+                        this.output = result;
+                        msg = '内容已自动保存';
+                        this.showMessage(msg)
+                    }
                 }else{
-                    this.$message({
-                        message: '请输入内容后再保存',
-                        type: 'error'
-                    });
+                    if(!isEmpty){
+                        refs.forEach(item => {
+                            result += item.parse();
+                        });
+                        this.output = result;
+                        msg = '内容已成功粘贴到剪切板';
+                        this.showMessage(msg)
+                    }else{
+                        this.$message({
+                            message: '请输入内容后再保存',
+                            type: 'error'
+                        });
+                    }
                 }
             },
             showMessage: function(msg){

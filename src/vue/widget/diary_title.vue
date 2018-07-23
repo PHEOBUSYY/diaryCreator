@@ -28,19 +28,19 @@
                 }
                 return result;
             },
+            weekDay: function () {
+                let date = new Date(this.date);
+                return this.weekDays[date.getDay() - 1];
+            }
         },
         methods: {
-            createDefaultTitle: function () {
-                let date = new Date();
-                return this.weekDays[date.getDay() - 1];
-            },
             parse: function () {
                 this.save();
                 let result = '\n';
                 if (this.dataList.length > 0) {
                     for (let i = 0; i < this.dataList.length; i++) {
                         if (i === 0) {
-                            result += '## ' + this.createDefaultTitle() + ':' + this.dataList[i].value + '\n';
+                            result += '## ' + this.weekDay + ':' + this.dataList[i].value + '\n';
                         } else if (i === 1) {
                             result += '### 每日金句\n';
                             result += '> ' + this.dataList[i].value + '\n'

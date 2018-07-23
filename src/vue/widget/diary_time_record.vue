@@ -110,7 +110,7 @@
                     this.parseResult = JSON.stringify(this.dataList);
                 }
             },
-            del: function(){
+            del: function () {
                 if (this.$electron) {
                     this.$electron.ipcRenderer.send(ipcKey, {
                         method: 'delete',
@@ -118,7 +118,7 @@
                     });
                 }
             },
-            isEmpty: function(){
+            isEmpty: function () {
                 return this.dataList.filter(item => {
                     return item.start && item.end;
                 }).length === 0;
@@ -148,13 +148,25 @@
             },
             updateTime: function (index, args) {
                 let itemData = args[0];//当前行对象
+                let changeIndex = args[1];//哪一行发生了变化
                 this.$set(this.dataList, index, itemData);
                 //调整时间选择的范围
-                if (itemData.end) {
-                    this.$set(this.pickRange, 'start', itemData.end);
-                } else if (itemData.start) {
-                    this.$set(this.pickRange, 'start', itemData.start);
+                if (changeIndex === 0) {
+                    //第一行的时间发生了改变，第二行的时间范围调整
+                    if (!itemData.start) {
+                        this.$set(this.pickRange, 'start', '05:00');
+                    }
+                } else {
+                    //第二行发生了改变
+                    this.$set(this.pickRange, 'start', itemData.start ? itemData.start : '05:00');
                 }
+                // if (itemData.end) {
+                //     this.$set(this.pickRange, 'start', itemData.end);
+                // } else if (itemData.start) {
+                //     this.$set(this.pickRange, 'start', itemData.start);
+                // }else {
+                //     this.$set(this.pickRange, 'start', '05:00');
+                // }
                 if (index < this.dataList.length - 1) {
                     //把当前行的end时间设置为下一行的start
                     let nextData = this.dataList[index + 1];
