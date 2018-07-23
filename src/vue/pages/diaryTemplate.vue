@@ -38,6 +38,7 @@
     import diary_achievement from '../widget/diary_achievement';
     import Diary_photos from "../widget/diary_photos";
 
+    const ipcKey = 'schedule';
     export default {
         components: {
             Diary_photos,
@@ -182,14 +183,20 @@
         },
         mounted: function () {
             if (this.$electron) {
-                this.$electron.ipcRenderer.on('schedule', (event, args) => {
+                this.$electron.ipcRenderer.on(ipcKey , (event, args) => {
                     //日程，接收到日程的通知后，自动保存
                     if (args === 'autosave') {
                         this.generate(true);
                     }
                 });
             }
-        }
+        },
+        beforeDestroy: function () {
+            if(this.$electron){
+                this.$electron.ipcRenderer.removeAllListeners(ipcKey)
+            }
+
+        },
     }
 </script>
 <style scoped lang="scss">
