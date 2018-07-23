@@ -110,6 +110,19 @@
                     this.parseResult = JSON.stringify(this.dataList);
                 }
             },
+            del: function(){
+                if (this.$electron) {
+                    this.$electron.ipcRenderer.send(ipcKey, {
+                        method: 'delete',
+                        time: this.date,
+                    });
+                }
+            },
+            isEmpty: function(){
+                return this.dataList.filter(item => {
+                    return item.start && item.end;
+                }).length === 0;
+            },
             onGet: function (res) {
                 if (res) {
                     this.dataList = res.data;
@@ -126,6 +139,8 @@
                     if (method === 'get') {
                         this.onGet(res);
                     } else if (method === 'delete') {
+                        //删除
+                        this.initDefault();
                     } else if (method === 'create') {
                     }
 

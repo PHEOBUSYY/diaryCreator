@@ -23,9 +23,8 @@
             <diary_inspiration :date="date" ref="diary_inspiration"></diary_inspiration>
             <diary_photos :date="date" ref="diary_photos"></diary_photos>
             
-            <button class="ui teal button make" @click="generate">make</button>
-            <!--<el-input v-if="output" ref="output" type="textarea" autosize-->
-            <!--v-model="output"></el-input>-->
+            <button class="ui teal button make" @click="remove">remove</button>
+            <button class="ui teal button make" @click="generate(false)">make</button>
         
         </div>
     </div>
@@ -78,21 +77,27 @@
                 refs.push(diary_photos);
                 //这些组件中必须包含两个方法： parse和isChange
                 let isChange = false;
+                let isEmpty = true;
+                refs.forEach(item => {
+                    if(!item.isEmpty()){
+                        isEmpty = false;
+                    }
+                });
                 refs.forEach(item => {
                     if(item !== diary_target && item.isChange()){
                         isChange = true;
                     }
                 });
                 let msg = '';
-                if(isAuto && isChange){
+                if(isAuto && isChange && !isEmpty){
                     refs.forEach(item => {
                         result += item.parse();
                     });
                     this.output = result;
-                    // console.log("result", result);
                     msg = '内容已自动保存';
                     this.showMessage(msg)
-                } else if(!isAuto){
+                }
+                if(!isAuto && !isEmpty){
                     refs.forEach(item => {
                         result += item.parse();
                     });
@@ -100,7 +105,10 @@
                     msg = '内容已成功粘贴到剪切板';
                     this.showMessage(msg)
                 }else{
-                
+                    this.$message({
+                        message: '请输入内容后再保存',
+                        type: 'error'
+                    });
                 }
             },
             showMessage: function(msg){
@@ -130,6 +138,42 @@
             },
             changeDate3: function () {
                 this.date = new Date().toLocaleDateString();
+            },
+            remove: function () {
+                let diary_title = this.$refs.diary_title;
+                let diary_achievement = this.$refs.diary_achievement;
+                let diary_time_record = this.$refs.diary_time_record;
+                let diary_target = this.$refs.diary_target;
+                let diary_inspiration = this.$refs.diary_inspiration;
+                let diary_photos = this.$refs.diary_photos;
+                let refs = [];
+                refs.push(diary_title);
+                refs.push(diary_achievement);
+                refs.push(diary_time_record);
+                refs.push(diary_target);
+                refs.push(diary_inspiration);
+                refs.push(diary_photos);
+                let isEmpty = true;
+                refs.forEach(item => {
+                   if(!item.isEmpty()){
+                       isEmpty = false;
+                   }
+                });
+                if(isEmpty){
+                    this.$message({
+                        message: '请输入内容后再删除',
+                        type: 'error'
+                    });
+                }else{
+                    refs.forEach(item => {
+                        item.del();
+                    });
+                    this.$message({
+                        message: '删除成功',
+                        type: 'success'
+                    });
+                }
+                
             }
         },
         mounted: function () {

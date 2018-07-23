@@ -76,6 +76,12 @@
             isChange: function(){
                 return false;
             },
+            del: function(){
+              //undo 不删除计划相关内容
+            },
+            isEmpty: function(){
+                return true;
+            },
             onGet: function (time, res) {
                 // console.log("diary_target renderer get", res);
                 if (res) {

@@ -94,6 +94,20 @@
                     this.parseResult = JSON.stringify(this.dataList);
                 }
             },
+            del: function(){
+                if (this.$electron) {
+                    this.$electron.ipcRenderer.send(ipcKey, {
+                        method: 'delete',
+                        time: this.date,
+                        type: this.type
+                    });
+                }
+            },
+            isEmpty: function(){
+                return this.dataList.filter(item => {
+                    return item.value;
+                }).length === 0;
+            },
             wrap: function (obj, option) {
                 //包裹数据库对象+样式对象
                 Object.keys(option).forEach(key => {
@@ -114,6 +128,8 @@
                             // console.log("ipcRenderer get", JSON.stringify(res));
                             this.onGet(res);
                         } else if (method === 'delete') {
+                            //删除
+                            this.initDefault();
                         } else if (method === 'create') {
                         }
                     }
