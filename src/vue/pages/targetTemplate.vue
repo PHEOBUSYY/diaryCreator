@@ -8,16 +8,19 @@
             <a class="section labeled teal active">目标</a>
         </div>
         <diary_section_header title="目标模板"></diary_section_header>
-        <el-date-picker
-                style="width: 50%"
-                v-model="timeRange"
-                type="week"
-                @change="timeChange"
-                format="yyyy 第 WW 周"
-                placeholder="选择周"
-                :picker-options="pickerOptions"
-        >
-        </el-date-picker>
+        <div class="header">
+            <a class="section labeled teal active" @click="changeDate"><</a>
+            <el-date-picker
+                    style="width: 50%"
+                    v-model="timeRange"
+                    type="week"
+                    format="yyyy 第 WW 周"
+                    placeholder="选择周"
+                    :picker-options="pickerOptions"
+            >
+            </el-date-picker>
+            <a class="section labeled teal active" @click="changeDate2">></a>
+        </div>
         <target_item v-for="(item, index) in targetList" v-model="targetList[index]"
                      :key="index+'_target_item_'"
                      :sid="index+'_target_item_'+realTime"></target_item>
@@ -53,6 +56,7 @@
     import Target_item from "../widget/target_item";
     import diary_section_header from '../widget/diary_section_header'
     import Target_week_summary from "../widget/target_week_summary";
+
     const ipcKey = 'target';
     const ipcRendererKey = 'targetRenderer';
     export default {
@@ -115,7 +119,25 @@
                 })
             }
         },
+        watch: {
+          timeRange: function (newVal,oldVal) {
+              if(newVal !== oldVal){
+                  this.timeChange()
+              }
+              
+          }
+        },
         methods: {
+            changeDate: function(){
+                let date = new Date(this.timeRange);
+                date.setDate(date.getDate() - 7);
+                this.timeRange = date.toLocaleDateString();
+            },
+            changeDate2:function(){
+                let date = new Date(this.timeRange);
+                date.setDate(date.getDate() + 7);
+                this.timeRange = date.toLocaleDateString();
+            },
             addNew: function () {
                 this.targetList.push({
                     text: '',
@@ -129,7 +151,9 @@
                 let realList = this.targetList.filter(item => {
                     return item.text;
                 });
-                this.$electron.ipcRenderer.send(ipcKey, 'create', this.realTime, realList ,this.summary, );
+                if (this.$electron) {
+                    this.$electron.ipcRenderer.send(ipcKey, 'create', this.realTime, realList, this.summary,);
+                }
             },
             initEmpty: function () {
                 this.targetList = [];
@@ -154,11 +178,15 @@
                 this.generate = '';
             },
             clear: function () {
-                this.$electron.ipcRenderer.send(ipcKey, 'delete', this.realTime);
+                if (this.$electron) {
+                    this.$electron.ipcRenderer.send(ipcKey, 'delete', this.realTime);
+                }
             },
             timeChange: function () {
                 //切换时间
-                this.$electron.ipcRenderer.send(ipcKey, 'get', this.realTime);
+                if (this.$electron) {
+                    this.$electron.ipcRenderer.send(ipcKey, 'get', this.realTime);
+                }
 
             },
             generateSingleLine: function (prefix, item) {
@@ -267,25 +295,30 @@
                         type: 'error'
                     });
                 }
+            },
+            onRender: function () {
+                if (this.$electron) {
+                    this.$electron.ipcRenderer.on(ipcRendererKey, (event, method, time, res) => {
+                        if (method === 'get') {
+                            this.onGet(res);
+                        } else if (method === 'delete') {
+                            this.onDelete(res);
+                        } else if (method === 'create') {
+                            console.log("ipc", 'onCreateOrUpdate');
+                            this.onCreateOrUpdate(res);
+                        }
+                    })
+                }
             }
 
         },
         mounted: function () {
             this.timeRange = new Date().toDateString();
-            this.timeChange();
-            this.$electron.ipcRenderer.on(ipcRendererKey, (event, method, time, res) => {
-                if (method === 'get') {
-                    this.onGet(res);
-                } else if (method === 'delete') {
-                    this.onDelete(res);
-                } else if (method === 'create') {
-                    console.log("ipc", 'onCreateOrUpdate');
-                    this.onCreateOrUpdate(res);
-                }
-            })
+            // this.timeChange();
+            this.onRender();
         },
         beforeDestroy: function () {
-            if(this.$electron){
+            if (this.$electron) {
                 this.$electron.ipcRenderer.removeAllListeners(ipcRendererKey);
             }
         }
@@ -306,7 +339,15 @@
             
         }
     }
-    
+    .header{
+        width: 100%;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 10px;
+        cursor: pointer;
+        font-size:16px;
+    }
     .target-input {
     }
     
