@@ -54,6 +54,7 @@
     import diary_section_header from '../widget/diary_section_header'
     import Target_week_summary from "../widget/target_week_summary";
     const ipcKey = 'target';
+    const ipcRendererKey = 'targetRenderer';
     export default {
         components: {Target_week_summary, Target_item, diary_section_header},
         data: function () {
@@ -221,13 +222,13 @@
                     } else {
                         document.execCommand("Copy");
                     }
-                    this.$message({
-                        message: '计划已粘贴到剪切板',
-                        type: 'success'
-                    });
                 } catch (e) {
                     console.log(e);
                 }
+                this.$message({
+                    message: '计划已粘贴到剪切板',
+                    type: 'success'
+                });
             },
             onGet: function (res) {
                 if (res) {
@@ -260,10 +261,6 @@
             onCreateOrUpdate: function (res) {
                 if (res) {
                     this.generateTemplate();
-                    this.$message({
-                        message: '保存成功',
-                        type: 'success'
-                    });
                 } else {
                     this.$message({
                         message: '目标不能为空',
@@ -276,15 +273,21 @@
         mounted: function () {
             this.timeRange = new Date().toDateString();
             this.timeChange();
-            this.$electron.ipcRenderer.on('targetRenderer', (event, method, time, res) => {
+            this.$electron.ipcRenderer.on(ipcRendererKey, (event, method, time, res) => {
                 if (method === 'get') {
                     this.onGet(res);
                 } else if (method === 'delete') {
                     this.onDelete(res);
                 } else if (method === 'create') {
+                    console.log("ipc", 'onCreateOrUpdate');
                     this.onCreateOrUpdate(res);
                 }
             })
+        },
+        beforeDestroy: function () {
+            if(this.$electron){
+                this.$electron.ipcRenderer.removeAllListeners(ipcRendererKey);
+            }
         }
     };
 </script>
