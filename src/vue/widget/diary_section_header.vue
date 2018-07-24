@@ -1,10 +1,10 @@
 <template>
     <div class="container">
-    <h3 class="ui header teal">
-        <img src="../../css/static/img/diary.svg"
-             class="ui rounded mini image">
-        {{title}}
-    </h3>
+        <h3 class="ui header teal">
+            <img src="../../css/static/img/diary.svg"
+                 class="ui rounded mini image">
+            {{title}}
+        </h3>
     </div>
 </template>
 
@@ -22,6 +22,6 @@
 
 <style scoped lang="scss">
     .container {
-        margin: 25px;
+        margin: 25px auto;
     }
 </style>

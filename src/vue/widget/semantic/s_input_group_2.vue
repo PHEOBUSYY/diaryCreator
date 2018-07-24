@@ -1,8 +1,8 @@
 <template>
     <div class="group">
-        <s_input v-model="item.value" v-for="(item, index) in dataList" :key="index"
-                 :label="item.label" :placeholder="item.placeholder"
-                 :fluid="item.fluid" :color="item.color"
+        <s_input :disabled="config.disabled" v-model="item.value" v-for="(item, index) in dataList" :key="index"
+                 :label="item.label || config.label || (index +1) +''" :placeholder="config.placeholder"
+                 :fluid="config.fluid" :color="config.color"
         ></s_input>
         <button v-if="showAdd && dataList.length>0 && dataList[dataList.length -1].value" @click="addNewLine" class="ui teal basic button mini" style="margin-top: 5px">add</button>
     </div>
@@ -14,15 +14,23 @@
     export default {
         name: "s_input_group",
         components: {s_input},
-        data: function () {
-            return {
-            }
-        },
         props: {
             dataList: {
                 type: Array,
                 default: function () {
                     return []
+                }
+            },
+            config: {
+                type:Object,
+                default: function () {
+                    return {
+                        label: '',
+                        fluid: true,
+                        color: 'teal',
+                        placeholder: '写点什么',
+                        disabled: false
+                    }
                 }
             },
             showAdd: {
@@ -32,12 +40,8 @@
             
         },
         methods: {
-            parse: function () {
-                return this.dataList;
-            },
             addNewLine: function () {
                 this.$emit('addNewLine');
-                // this.dataList = this.dataList.concat(this.dataList.slice(this.dataList.length - 1));
             }
         }
     }
