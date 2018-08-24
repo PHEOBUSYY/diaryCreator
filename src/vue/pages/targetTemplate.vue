@@ -57,8 +57,7 @@
     import diary_section_header from '../widget/diary_section_header'
     import Target_week_summary from "../widget/target_week_summary";
 
-    const ipcKey = 'target';
-    const ipcRendererKey = 'targetRenderer';
+    //目标就是把所有关于electron ipc的逻辑都放在后面的vux中，触发事件通过action来完成，解析结果在main.js中
     export default {
         components: {Target_week_summary, Target_item, diary_section_header},
         data: function () {
@@ -66,6 +65,7 @@
                 dialogVisible: false,
                 weekDays: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
                 targetList: [],
+                summary: {},
                 repeat_options: [{
                     value: '1',
                     label: '工作日'
@@ -82,23 +82,8 @@
                 pickerOptions: {
                     firstDayOfWeek: 1
                 },
-                timeRange: '',
-                generate: '',
-                summary: {
-                    improve: [
-                        {
-                            value: ''
-                        },
-                        {
-                            value: ''
-                        },
-                        {
-                            value: ''
-                        }
-                    ],
-                    overall: '',
-                    score: ''
-                }
+                timeRange: new Date().toDateString(),
+                generate: ''
             };
         },
         computed: {
@@ -117,23 +102,47 @@
                 return this.targetList.filter(item => {
                     return item.text;
                 })
+            },
+            targetObj: function () {
+                return this.$store.getters['target/getTargetObj'](this.realTime);
+            },
+            saveState: function () {
+                return this.$store.getters['target/getSave'](this.realTime);
             }
         },
         watch: {
-          timeRange: function (newVal,oldVal) {
-              if(newVal !== oldVal){
-                  this.timeChange()
-              }
-              
-          }
+            timeRange: {
+                handler: function (newVal, oldVal) {
+                    if (newVal !== oldVal) {
+                        this.timeChange()
+                    }
+                },
+                immediate: true
+            },
+            targetObj: {
+                handler: function (newVal) {
+                    if (newVal) {
+                        this.targetList = newVal.targetList;
+                        this.summary = newVal.summary;
+                    }
+                },
+                deep: true,
+                immediate: true
+            },
+            saveState: function (newVal) {
+                if (newVal) {
+                    this.generateTemplate();
+                    this.$store.commit('target/afterSave',{time: this.realTime})
+                }
+            }
         },
         methods: {
-            changeDate: function(){
+            changeDate: function () {
                 let date = new Date(this.timeRange);
                 date.setDate(date.getDate() - 7);
                 this.timeRange = date.toLocaleDateString();
             },
-            changeDate2:function(){
+            changeDate2: function () {
                 let date = new Date(this.timeRange);
                 date.setDate(date.getDate() + 7);
                 this.timeRange = date.toLocaleDateString();
@@ -148,46 +157,25 @@
                 })
             },
             save: function () {
-                let realList = this.targetList.filter(item => {
-                    return item.text;
+                this.$store.dispatch('target/sendIpc', {
+                    method: 'create',
+                    time: this.realTime,
+                    targets: this.realData,
+                    summary: this.summary
                 });
-                if (this.$electron) {
-                    this.$electron.ipcRenderer.send(ipcKey, 'create', this.realTime, realList, this.summary,);
-                }
-            },
-            initEmpty: function () {
-                this.targetList = [];
-                for (let i = 0; i < 7; i++) {
-                    this.addNew();
-                }
-                this.summary = {
-                    improve: [
-                        {
-                            value: ''
-                        },
-                        {
-                            value: ''
-                        },
-                        {
-                            value: ''
-                        }
-                    ],
-                    overall: '',
-                    score: ''
-                };
-                this.generate = '';
             },
             clear: function () {
-                if (this.$electron) {
-                    this.$electron.ipcRenderer.send(ipcKey, 'delete', this.realTime);
-                }
+                this.$store.dispatch('target/sendIpc', {
+                    method: 'delete',
+                    time: this.realTime
+                });
             },
             timeChange: function () {
-                //切换时间
-                if (this.$electron) {
-                    this.$electron.ipcRenderer.send(ipcKey, 'get', this.realTime);
-                }
-
+                //切换时间,获取数据-通过vuex来获取
+                this.$store.dispatch('target/sendIpc', {
+                    time: this.realTime,
+                    method: 'get'
+                });
             },
             generateSingleLine: function (prefix, item) {
                 //生成的单行格式
@@ -244,83 +232,20 @@
                 this.generate = output;
                 console.log("generate result ", output);
                 //拼接总结部分
-                try {
-                    if (this.$electron) {
-                        this.$electron.clipboard.writeText(this.generate);
-                    } else {
-                        document.execCommand("Copy");
-                    }
-                } catch (e) {
-                    console.log(e);
-                }
+                this.$store.commit('target/copy', {
+                    generate: this.generate
+                });
                 this.$message({
                     message: '计划已粘贴到剪切板',
                     type: 'success'
                 });
-            },
-            onGet: function (res) {
-                if (res) {
-                    this.targetList = res.targets.map(item => {
-                        return {
-                            text: item.text,
-                            star: item.star,
-                            editable: item.editable,
-                            type: item.type,
-                            week: item.week
-                        }
-                    });
-                    this.summary.score = res.summary.score;
-                    this.summary.overall = res.summary.overall;
-                    this.summary.improve = res.summary.improve.map(item => {
-                        return {
-                            value: item.value
-                        }
-                    })
-                } else {
-                    this.initEmpty();
-                }
-                this.generate = "";
-            },
-            onDelete: function (res) {
-                if (res) {
-                    this.initEmpty();
-                }
-            },
-            onCreateOrUpdate: function (res) {
-                if (res) {
-                    this.generateTemplate();
-                } else {
-                    this.$message({
-                        message: '目标不能为空',
-                        type: 'error'
-                    });
-                }
-            },
-            onRender: function () {
-                if (this.$electron) {
-                    this.$electron.ipcRenderer.on(ipcRendererKey, (event, method, time, res) => {
-                        if (method === 'get') {
-                            this.onGet(res);
-                        } else if (method === 'delete') {
-                            this.onDelete(res);
-                        } else if (method === 'create') {
-                            console.log("ipc", 'onCreateOrUpdate');
-                            this.onCreateOrUpdate(res);
-                        }
-                    })
-                }
             }
-
         },
         mounted: function () {
-            this.timeRange = new Date().toDateString();
-            // this.timeChange();
-            this.onRender();
         },
         beforeDestroy: function () {
-            if (this.$electron) {
-                this.$electron.ipcRenderer.removeAllListeners(ipcRendererKey);
-            }
+            this.$store.dispatch('target/removeIpc');
+            
         }
     };
 </script>
@@ -339,15 +264,17 @@
             
         }
     }
-    .header{
+    
+    .header {
         width: 100%;
         display: flex;
         justify-content: space-around;
         align-items: center;
         padding: 10px;
         cursor: pointer;
-        font-size:16px;
+        font-size: 16px;
     }
+    
     .target-input {
     }
     

@@ -59,7 +59,10 @@
                 date.setDate(date.getDate() - date.getDay() + 1);
                 let key = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
                 if (this.$electron) {
-                    this.$electron.ipcRenderer.send('target', 'get', key);
+                    this.$electron.ipcRenderer.send('target', {
+                        method: 'get',
+                        time: key
+                    });
                 }
             },
             generateSingleLine: function (prefix, item) {

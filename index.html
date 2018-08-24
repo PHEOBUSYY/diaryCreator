@@ -17,7 +17,9 @@
 <div id="app"></div>
 <script>
     // electron专用
-    require('../renderer.js')
+    try{
+        require('../renderer.js')
+    }catch(e){}
 </script>
 <!-- built script files will be auto injected -->
 </body>
