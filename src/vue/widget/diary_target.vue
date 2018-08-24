@@ -51,19 +51,33 @@
                 if (newVal !== oldVal) {
                     this.getTarget();
                 }
+            },
+            targetObj: {
+                handler: function (newVal) {
+                    if (newVal) {
+                        this.onGet(newVal.targetList);
+                    }
+                },
+                deep: true,
+                immediate: true
+            },
+        },
+        computed: {
+            targetObj: function () {
+                return this.$store.getters['target/getTargetObj'](this.realTime);
+            },
+            realTime: function () {
+                let date = new Date(this.date);
+                date.setDate(date.getDate() - date.getDay() + 1);
+                return date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
             }
         },
         methods: {
             getTarget: function () {
-                let date = new Date(this.date);
-                date.setDate(date.getDate() - date.getDay() + 1);
-                let key = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
-                if (this.$electron) {
-                    this.$electron.ipcRenderer.send('target', {
-                        method: 'get',
-                        time: key
-                    });
-                }
+                this.$store.dispatch('target/sendIpc', {
+                    method: 'get',
+                    time: this.realTime
+                });
             },
             generateSingleLine: function (prefix, item) {
                 //生成的单行格式
@@ -76,90 +90,74 @@
             parse: function () {
                 return this.output;
             },
-            isChange: function(){
+            isChange: function () {
                 return false;
             },
-            del: function(){
-              //undo 不删除计划相关内容
+            del: function () {
+                //undo 不删除计划相关内容
             },
-            isEmpty: function(){
+            isEmpty: function () {
                 return true;
             },
-            onGet: function (time, res) {
-                // console.log("diary_target renderer get", res);
-                if (res) {
-                    //获取当前时间
-                    let date = new Date(this.date);
-                    let weekDay = date.getDay();
-                    //取到了本周的计划列表
-                    let targetList = res.targets;
-                    if (targetList && targetList.length > 0) {
-                        let output = '\r\n';
-                        output += '### 本周目标\r\n';
-                        for (let i = 0; i < targetList.length; i++) {
-                            targetList[i].output = this.generateSingleLine(i + 1, targetList[i]);
-                            output += targetList[i].output;
-                        }
-                        this.weekTarget = targetList;
-                        output += '\r\n';
-                        let result = [];
-                        targetList.forEach(item => {
-                            if (item.week && item.week.length > 0) {
-                                let weekArray = item.week;
-                                weekArray.forEach(weekDay => {
-                                    let index = this.weekDays.indexOf(weekDay);
-                                    if (!result[index]) {
-                                        result[index] = [];
-                                    }
-                                    result[index].push(item);
-                                })
-                            } else {
-                                let othersIndex = this.weekDays.length;
-                                if (!result[othersIndex]) {
-                                    result[othersIndex] = [];
+            onGet: function (targetList) {
+                //获取当前时间
+                let date = new Date(this.date);
+                let weekDay = date.getDay();
+                //取到了本周的计划列表
+                if (targetList && targetList.length > 0) {
+                    let output = '\r\n';
+                    output += '### 本周目标\r\n';
+                    for (let i = 0; i < targetList.length; i++) {
+                        targetList[i].output = this.generateSingleLine(i + 1, targetList[i]);
+                        output += targetList[i].output;
+                    }
+                    this.weekTarget = targetList;
+                    output += '\r\n';
+                    let result = [];
+                    targetList.forEach(item => {
+                        if (item.week && item.week.length > 0) {
+                            let weekArray = item.week;
+                            weekArray.forEach(weekDay => {
+                                let index = this.weekDays.indexOf(weekDay);
+                                if (!result[index]) {
+                                    result[index] = [];
                                 }
-                                result[othersIndex].push(item);
+                                result[index].push(item);
+                            })
+                        } else {
+                            let othersIndex = this.weekDays.length;
+                            if (!result[othersIndex]) {
+                                result[othersIndex] = [];
                             }
+                            result[othersIndex].push(item);
+                        }
+                    });
+                    output += '### 今日目标\r\n';
+                    if (result[weekDay]) {
+                        result[weekDay].forEach(item => {
+                            output += item.output;
                         });
-                        output += '### 今日目标\r\n';
-                        if (result[weekDay]) {
-                            result[weekDay].forEach(item => {
+                        this.todayTarget = result[weekDay];
+                    }
+                    output += '\r\n';
+                    if (weekDay + 1 < result.length) {
+                        output += '### 明日目标\r\n';
+                        if (result[weekDay + 1]) {
+                            result[weekDay + 1].forEach(item => {
                                 output += item.output;
                             });
-                            this.todayTarget = result[weekDay];
+                            this.tomorrowTarget = result[weekDay + 1];
                         }
-                        output += '\r\n';
-                        if (weekDay + 1 < result.length) {
-                            output += '### 明日目标\r\n';
-                            if (result[weekDay + 1]) {
-                                result[weekDay + 1].forEach(item => {
-                                    output += item.output;
-                                });
-                                this.tomorrowTarget = result[weekDay + 1];
-                            }
-                        }
-                        output += '\r\n';
-                        this.output = output;
-                        this.show = output.replace(/\r\n/g, '<br>').replace(/\- \[ \] /g, '').replace(/### /g, '');
-                        // console.log("output", output);
                     }
+                    output += '\r\n';
+                    this.output = output;
+                    this.show = output.replace(/\r\n/g, '<br>').replace(/\- \[ \] /g, '').replace(/### /g, '');
+                    // console.log("output", output);
                 }
             },
-            onRenderer: function () {
-                this.$electron.ipcRenderer.on('targetRenderer', (event, method, time, res) => {
-                    if (method === 'get') {
-                        this.onGet(time, res);
-                    } else if (method === 'delete') {
-                    } else if (method === 'create') {
-                    }
-                });
-            }
         },
         mounted: function () {
-            if (this.$electron) {
-                this.onRenderer();
-                this.getTarget();
-            }
+            this.getTarget();
         }
     }
 </script>
