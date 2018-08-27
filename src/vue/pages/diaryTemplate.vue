@@ -11,10 +11,10 @@
                 </a>
             </div>
             <div class="date">
-                <a class="section labeled teal active" @click="changeDate"><</a>
+                <a class="section labeled teal active" @click="preDay"><</a>
                 <a class="section labeled teal active"
                    @click="changeDate3"><span>{{date}}</span></a>
-                <a class="section labeled teal active" @click="changeDate2">></a>
+                <a class="section labeled teal active" @click="nextDay">></a>
             </div>
             <diary-title :date="date" ref="diary_title"></diary-title>
             <diary_achievement :date="date" ref="diary_achievement"></diary_achievement>
@@ -37,6 +37,7 @@
     import diary_inspiration from '../widget/diary_inspiration';
     import diary_achievement from '../widget/diary_achievement';
     import Diary_photos from "../widget/diary_photos";
+    import {EventBus} from "../../Events";
 
     const ipcKey = 'schedule';
     export default {
@@ -131,12 +132,12 @@
                     console.log(e);
                 }
             },
-            changeDate: function () {
+            preDay: function () {
                 let date = new Date(this.date);
                 date.setDate(date.getDate() - 1);
                 this.date = date.toLocaleDateString();
             },
-            changeDate2: function () {
+            nextDay: function () {
                 let date = new Date(this.date);
                 date.setDate(date.getDate() + 1);
                 this.date = date.toLocaleDateString();
@@ -182,19 +183,16 @@
             }
         },
         mounted: function () {
-            if (this.$electron) {
-                this.$electron.ipcRenderer.on(ipcKey , (event, args) => {
-                    //日程，接收到日程的通知后，自动保存
-                    if (args === 'autosave') {
-                        this.generate(true);
-                    }
-                });
-            }
+            EventBus.$on('system', (data) => {
+                if(data.action === 'pre'){
+                    this.preDay();
+                }else if(data.action === 'next'){
+                    this.nextDay();
+                }
+            });
         },
         beforeDestroy: function () {
-            if(this.$electron){
-                this.$electron.ipcRenderer.removeAllListeners(ipcKey)
-            }
+            EventBus.$off('system');
 
         },
     }

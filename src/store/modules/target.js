@@ -1,7 +1,22 @@
 import Vue from 'vue';
 
-const ipcKey = 'target';
-const ipcRendererKey = 'targetRenderer';
+import {
+    TARGET_IPCKEY,
+    TARGET_IPCRENDERERKEY,
+    SENDIPC,
+    ONIPCRECEIVE,
+    REMOVEIPC,
+    COPY,
+    AFTERSAVE,
+    GETTARGETOBJ,
+    GETSAVE,
+    METHOD_GET,
+    METHOD_CREATE,
+    METHOD_DELETE
+} from '../mutation-types'
+
+const ipcKey = TARGET_IPCKEY;
+const ipcRendererKey = TARGET_IPCRENDERERKEY;
 export default {
     namespaced: true,
     state: {
@@ -9,55 +24,53 @@ export default {
         save: {}
     },
     mutations: {
-        onIpcReceive: function (state, payload) {
+        [ONIPCRECEIVE]: function (state, payload) {
             //所有的ipc回调都在这里处理
-            console.log("onIpcReceive payload", payload);
             let args = payload.args;
             let res = payload.res;
             let method = args.method;
             let time = args.time;
-            if (method === 'get') {
+            if (method === METHOD_GET) {
                 onGet(state, time, res);
-            } else if (method === 'delete') {
+            } else if (method === METHOD_DELETE) {
                 Vue.set(state.targets, time, initDefault());
-            } else if (method === 'create') {
+            } else if (method === METHOD_CREATE) {
                 Vue.set(state.save, time, true);
             }
         },
-        copy: function (state, payload) {
+        [COPY]: function (state, payload) {
             if (global.electron) {
                 global.electron.clipboard.writeText(payload.generate);
             } else {
-                // document.execCommand("Copy");
                 //todo 这里通用的copy
 
             }
         },
-        afterSave: function (state, payload) {
+        [AFTERSAVE]: function (state, payload) {
             Vue.set(state.save, payload.time, null);
         }
     },
     actions: {
-        sendIpc: function (context, payload) {
+        [SENDIPC]: function (context, payload) {
             if (global.electron) {
                 global.electron.ipcRenderer.send(ipcKey, payload);
-            }else{
+            } else {
                 //todo 这里通过缓存来处理
             }
         },
-        onIpcReceive: function (context, payload) {
-            context.commit('onIpcReceive', payload);
+        [ONIPCRECEIVE]: function (context, payload) {
+            context.commit(ONIPCRECEIVE, payload);
         },
-        removeIpc: function (context) {
+        [REMOVEIPC]: function () {
             if (global.electron) {
                 global.electron.ipcRenderer.removeAllListeners(ipcRendererKey);
-            }else{
+            } else {
                 //todo 这里通过缓存来处理
             }
         }
     },
     getters: {
-        getTargetObj: (state) => (time) => {
+        [GETTARGETOBJ]: (state) => (time) => {
             let data = state.targets[time];
             //数据初始化
             if (!data) {
@@ -65,7 +78,7 @@ export default {
             }
             return data;
         },
-        getSave: (state) => (time) => {
+        [GETSAVE]: (state) => (time) => {
             let isSave = state.save[time];
             return !!isSave;
 
@@ -106,7 +119,7 @@ function initDefault() {
 
 function onGet(state, time, res) {
     let result = {};
-    if(res && res.targets){
+    if (res && res.targets) {
         result.targetList = res.targets.map(item => {
             return {
                 text: item.text,

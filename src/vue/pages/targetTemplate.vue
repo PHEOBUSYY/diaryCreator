@@ -9,7 +9,7 @@
         </div>
         <diary_section_header title="目标模板"></diary_section_header>
         <div class="header">
-            <a class="section labeled teal active" @click="changeDate"><</a>
+            <a class="section labeled teal active" @click="preWeek"><</a>
             <el-date-picker
                     style="width: 50%"
                     v-model="timeRange"
@@ -19,7 +19,7 @@
                     :picker-options="pickerOptions"
             >
             </el-date-picker>
-            <a class="section labeled teal active" @click="changeDate2">></a>
+            <a class="section labeled teal active" @click="nextWeek">></a>
         </div>
         <target_item v-for="(item, index) in targetList" v-model="targetList[index]"
                      :key="index+'_target_item_'"
@@ -56,6 +56,18 @@
     import Target_item from "../widget/target_item";
     import diary_section_header from '../widget/diary_section_header'
     import Target_week_summary from "../widget/target_week_summary";
+    import {EventBus} from "../../Events";
+    import {
+        TARGET_SENDIPC,
+        TARGET_REMOVEIPC,
+        TARGET_COPY,
+        TARGET_AFTERSAVE,
+        TARGET_GETTARGETOBJ,
+        TARGET_GETSAVE,
+        METHOD_GET,
+        METHOD_CREATE,
+        METHOD_DELETE
+    } from '../../store/mutation-types'
 
     //目标就是把所有关于electron ipc的逻辑都放在后面的vux中，触发事件通过action来完成，解析结果在main.js中
     export default {
@@ -104,10 +116,10 @@
                 })
             },
             targetObj: function () {
-                return this.$store.getters['target/getTargetObj'](this.realTime);
+                return this.$store.getters[TARGET_GETTARGETOBJ](this.realTime);
             },
             saveState: function () {
-                return this.$store.getters['target/getSave'](this.realTime);
+                return this.$store.getters[TARGET_GETSAVE](this.realTime);
             }
         },
         watch: {
@@ -132,17 +144,17 @@
             saveState: function (newVal) {
                 if (newVal) {
                     this.generateTemplate();
-                    this.$store.commit('target/afterSave',{time: this.realTime})
+                    this.$store.commit(TARGET_AFTERSAVE, {time: this.realTime})
                 }
             }
         },
         methods: {
-            changeDate: function () {
+            preWeek: function () {
                 let date = new Date(this.timeRange);
                 date.setDate(date.getDate() - 7);
                 this.timeRange = date.toLocaleDateString();
             },
-            changeDate2: function () {
+            nextWeek: function () {
                 let date = new Date(this.timeRange);
                 date.setDate(date.getDate() + 7);
                 this.timeRange = date.toLocaleDateString();
@@ -157,24 +169,24 @@
                 })
             },
             save: function () {
-                this.$store.dispatch('target/sendIpc', {
-                    method: 'create',
+                this.$store.dispatch(TARGET_SENDIPC , {
+                    method: METHOD_CREATE,
                     time: this.realTime,
                     targets: this.realData,
                     summary: this.summary
                 });
             },
             clear: function () {
-                this.$store.dispatch('target/sendIpc', {
-                    method: 'delete',
+                this.$store.dispatch(TARGET_SENDIPC, {
+                    method: METHOD_DELETE,
                     time: this.realTime
                 });
             },
             timeChange: function () {
                 //切换时间,获取数据-通过vuex来获取
-                this.$store.dispatch('target/sendIpc', {
-                    time: this.realTime,
-                    method: 'get'
+                this.$store.dispatch(TARGET_SENDIPC, {
+                    method: METHOD_GET,
+                    time: this.realTime
                 });
             },
             generateSingleLine: function (prefix, item) {
@@ -232,7 +244,7 @@
                 this.generate = output;
                 console.log("generate result ", output);
                 //拼接总结部分
-                this.$store.commit('target/copy', {
+                this.$store.commit(TARGET_COPY, {
                     generate: this.generate
                 });
                 this.$message({
@@ -241,12 +253,19 @@
                 });
             }
         },
-        mounted: function () {
-        },
         beforeDestroy: function () {
-            this.$store.dispatch('target/removeIpc');
-            
-        }
+            this.$store.dispatch(TARGET_REMOVEIPC);
+            EventBus.$off('system');
+        },
+        mounted: function () {
+            EventBus.$on('system', (data) => {
+                if(data.action === 'pre'){
+                    this.preWeek();
+                }else if(data.action === 'next'){
+                    this.nextWeek();
+                }
+            });
+        },
     };
 </script>
 <style scoped lang="scss">

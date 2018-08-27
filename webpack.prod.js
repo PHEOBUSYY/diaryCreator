@@ -4,17 +4,17 @@ var common = require('./webpack.common');
 var UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 module.exports = merge(common, {
     plugins: [
-        new UglifyJSPlugin({
-            parallel: true,
-            uglifyOptions: {
-                output: {
-                    comments: false,
-                    beautify: false,
-                },
-                compress: true,
-                warnings: false
-            }
-        }),
+        // new UglifyJSPlugin({
+        //     parallel: true,
+        //     uglifyOptions: {
+        //         output: {
+        //             comments: false,
+        //             beautify: false,
+        //         },
+        //         compress: true,
+        //         warnings: false
+        //     }
+        // }),
         new webpack.ProvidePlugin({
             $: 'jquery',
             jQuery: 'jquery'

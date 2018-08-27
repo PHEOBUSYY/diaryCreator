@@ -27,6 +27,12 @@
     import S_input from "./semantic/s_input";
     import diary_section_header from "./diary_section_header"
 
+    import {
+        TARGET_SENDIPC,
+        TARGET_GETTARGETOBJ,
+        METHOD_GET
+    } from '../../store/mutation-types'
+    
     export default {
         components: {S_input, diary_section_header},
         data: function () {
@@ -64,7 +70,7 @@
         },
         computed: {
             targetObj: function () {
-                return this.$store.getters['target/getTargetObj'](this.realTime);
+                return this.$store.getters[TARGET_GETTARGETOBJ](this.realTime);
             },
             realTime: function () {
                 let date = new Date(this.date);
@@ -74,8 +80,8 @@
         },
         methods: {
             getTarget: function () {
-                this.$store.dispatch('target/sendIpc', {
-                    method: 'get',
+                this.$store.dispatch(TARGET_SENDIPC, {
+                    method: METHOD_GET,
                     time: this.realTime
                 });
             },

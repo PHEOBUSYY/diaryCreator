@@ -12,9 +12,14 @@
 <script>
     import S_input_group from "./semantic/s_input_group";
     import Diary_section_header from "./diary_section_header";
+    import {
+        INPUTGROUP_SENDIPC,
+        INPUTGROUP_GETOBJ,
+        METHOD_GET,
+        METHOD_DELETE,
+        METHOD_CREATE
+    } from '../../store/mutation-types'
 
-    const rendererKey = 'inputGroupRenderer';
-    const ipcKey = 'inputGroup';
     export default {
         components: {Diary_section_header, S_input_group},
         data: function () {
@@ -38,6 +43,14 @@
                 if (newVal !== oldVal) {
                     this.initData();
                 }
+            },
+            inputGroupObj: {
+                handler: function (newVal) {
+                    // console.log("inputGroupObj", newVal);
+                    this.onGet(newVal);
+                },
+                deep: true,
+                immediate: true
             }
         },
         computed: {
@@ -49,6 +62,9 @@
                     placeholder: '请输入' + this.title
                 }]
             },
+            inputGroupObj: function () {
+                return this.$store.getters[INPUTGROUP_GETOBJ](this.date, this.type);
+            }
         },
         methods: {
             addNewLine: function () {
@@ -79,31 +95,28 @@
             },
             save: function () {
                 if (this.isChange()) {
-                    if (this.$electron) {
-                        this.$electron.ipcRenderer.send(ipcKey, {
-                            method: 'create',
-                            time: this.date,
-                            type: this.type,
-                            data: this.dataList.map(item => {
-                                return {
-                                    value: item.value
-                                }
-                            })
-                        });
-                    }
+
+                    this.$store.dispatch(INPUTGROUP_SENDIPC, {
+                        method: METHOD_CREATE,
+                        time: this.date,
+                        type: this.type,
+                        data: this.dataList.map(item => {
+                            return {
+                                value: item.value
+                            }
+                        })
+                    });
                     this.parseResult = JSON.stringify(this.dataList);
                 }
             },
-            del: function(){
-                if (this.$electron) {
-                    this.$electron.ipcRenderer.send(ipcKey, {
-                        method: 'delete',
-                        time: this.date,
-                        type: this.type
-                    });
-                }
+            del: function () {
+                this.$store.dispatch(INPUTGROUP_SENDIPC, {
+                    method: METHOD_DELETE,
+                    time: this.date,
+                    type: this.type
+                });
             },
-            isEmpty: function(){
+            isEmpty: function () {
                 return this.dataList.filter(item => {
                     return item.value;
                 }).length === 0;
@@ -115,41 +128,19 @@
                 });
                 return obj;
             },
-            onRenderer: function () {
-                if (!this.$electron) {
-                    return;
-                }
-                this.$electron.ipcRenderer.on(rendererKey, (event, args, res) => {
-                    let method = args.method;
-                    let type = args.type;
-                    if (type === this.type) {
-                        // console.log(rendererKey, args, res);
-                        if (method === 'get') {
-                            // console.log("ipcRenderer get", JSON.stringify(res));
-                            this.onGet(res);
-                        } else if (method === 'delete') {
-                            //删除
-                            this.initDefault();
-                        } else if (method === 'create') {
-                        }
-                    }
-
-                })
-            },
-            onGet: function (res) {
+            onGet: function (resultList) {
                 this.dataList = [];
-                // console.log("diary_dbhelper renderer get", res);
-                if (res && res.data && res.data.length > 0) {
-                    for (let i = 0; i < res.data.length; i++) {
-                        let item = res.data[i];
-                        let obj = {value: item.value};
+                
+                if (resultList && resultList.length > 0) {
+                    for (let i = 0; i < resultList.length; i++) {
+                        let item = resultList[i];
                         let option = {};
                         if (i < this.styleOption.length) {
                             option = this.styleOption[i];
                         } else {
                             option = this.styleOption[0];
                         }
-                        this.dataList.push(this.wrap(obj, option))
+                        this.dataList.push(this.wrap(item, option))
                     }
                 } else {
                     this.initDefault();
@@ -169,19 +160,14 @@
                 }
             },
             initData: function () {
-                if (this.$electron) {
-                    this.$electron.ipcRenderer.send(ipcKey, {
-                        method: 'get',
-                        time: this.date,
-                        type: this.type,
-                    });
-                } else {
-                    this.initDefault();
-                }
+                this.$store.dispatch(INPUTGROUP_SENDIPC, {
+                    method: METHOD_GET,
+                    time: this.date,
+                    type: this.type
+                });
             }
         },
         mounted: function () {
-            this.onRenderer();
             this.initData();
         }
     }
