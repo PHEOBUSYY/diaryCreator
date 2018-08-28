@@ -38,7 +38,11 @@
     import diary_achievement from '../widget/diary_achievement';
     import Diary_photos from "../widget/diary_photos";
     import {EventBus} from "../../Events";
-
+    import {
+        SYSTEM,
+        PRE,
+        NEXT
+    } from '../../store/mutation-types'
     export default {
         components: {
             Diary_photos,
@@ -46,7 +50,7 @@
             diaryTitle,
             diary_time_record,
             diary_inspiration,
-            diary_achievement
+            diary_achievement,
         },
         data: function () {
             return {
@@ -182,16 +186,16 @@
             }
         },
         mounted: function () {
-            EventBus.$on('system', (data) => {
-                if(data.action === 'pre'){
+            EventBus.$on(SYSTEM, (data) => {
+                if(data.action === PRE){
                     this.preDay();
-                }else if(data.action === 'next'){
+                }else if(data.action === NEXT){
                     this.nextDay();
                 }
             });
         },
         beforeDestroy: function () {
-            EventBus.$off('system');
+            EventBus.$off(SYSTEM);
 
         },
     }

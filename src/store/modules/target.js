@@ -17,11 +17,11 @@ import {
 
 const ipcKey = TARGET_IPCKEY;
 const ipcRendererKey = TARGET_IPCRENDERERKEY;
+import {EventBus} from '../../Events';
 export default {
     namespaced: true,
     state: {
         targets: {},
-        save: {}
     },
     mutations: {
         [ONIPCRECEIVE]: function (state, payload) {
@@ -35,7 +35,8 @@ export default {
             } else if (method === METHOD_DELETE) {
                 Vue.set(state.targets, time, initDefault());
             } else if (method === METHOD_CREATE) {
-                Vue.set(state.save, time, true);
+                //保存成功
+                EventBus.$emit('afterSave');
             }
         },
         [COPY]: function (state, payload) {
@@ -46,9 +47,6 @@ export default {
 
             }
         },
-        [AFTERSAVE]: function (state, payload) {
-            Vue.set(state.save, payload.time, null);
-        }
     },
     actions: {
         [SENDIPC]: function (context, payload) {
@@ -77,11 +75,6 @@ export default {
                 data = initDefault();
             }
             return data;
-        },
-        [GETSAVE]: (state) => (time) => {
-            let isSave = state.save[time];
-            return !!isSave;
-
         }
     }
 

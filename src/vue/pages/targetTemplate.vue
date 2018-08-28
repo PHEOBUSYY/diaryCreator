@@ -61,12 +61,14 @@
         TARGET_SENDIPC,
         TARGET_REMOVEIPC,
         TARGET_COPY,
-        TARGET_AFTERSAVE,
         TARGET_GETOBJ,
-        TARGET_GETSAVE,
         METHOD_GET,
         METHOD_CREATE,
-        METHOD_DELETE
+        METHOD_DELETE,
+        SYSTEM,
+        AFTERSAVE,
+        PRE,
+        NEXT
     } from '../../store/mutation-types'
 
     //目标就是把所有关于electron ipc的逻辑都放在后面的vux中，触发事件通过action来完成，解析结果在main.js中
@@ -117,9 +119,6 @@
             },
             targetObj: function () {
                 return this.$store.getters[TARGET_GETOBJ](this.realTime);
-            },
-            saveState: function () {
-                return this.$store.getters[TARGET_GETSAVE](this.realTime);
             }
         },
         watch: {
@@ -141,12 +140,6 @@
                 deep: true,
                 immediate: true
             },
-            saveState: function (newVal) {
-                if (newVal) {
-                    this.generateTemplate();
-                    this.$store.commit(TARGET_AFTERSAVE, {time: this.realTime})
-                }
-            }
         },
         methods: {
             preWeek: function () {
@@ -255,15 +248,18 @@
         },
         beforeDestroy: function () {
             this.$store.dispatch(TARGET_REMOVEIPC);
-            EventBus.$off('system');
+            EventBus.$off();
         },
         mounted: function () {
-            EventBus.$on('system', (data) => {
-                if(data.action === 'pre'){
+            EventBus.$on(SYSTEM, (data) => {
+                if(data.action === PRE){
                     this.preWeek();
-                }else if(data.action === 'next'){
+                }else if(data.action === NEXT){
                     this.nextWeek();
                 }
+            });
+            EventBus.$on(AFTERSAVE, () => {
+                this.generateTemplate();
             });
         },
     };

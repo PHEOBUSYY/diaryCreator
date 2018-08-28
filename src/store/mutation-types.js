@@ -20,6 +20,8 @@ export const COPY = 'copy';
 export const AFTERSAVE = 'aftersave';
 export const GETSAVE = 'getSave';
 export const GETOBJ = 'getobj';
+export const PRE = 'pre';
+export const NEXT = 'next';
 
 
 export const TARGET_IPCKEY = TARGET;
