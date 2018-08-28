@@ -71,7 +71,6 @@
             },
             recordObj: {
                 handler: function (newVal) {
-                    console.log("recordObj", newVal);
                     if (newVal) {
                         this.dataList = newVal;
                     }
