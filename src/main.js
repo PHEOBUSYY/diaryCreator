@@ -48,27 +48,43 @@ new Vue({
     mounted: function () {
     }
 });
-import {TARGET_IPCRENDERERKEY, TARGET_ONIPCRECEIVE, INPUTGROUP_IPCRENDERERKEY, INPUTGROUP_ONIPCRECEIVE,SYSTEM_IPCRENDERERKEY} from './store/mutation-types'
+import {
+    TARGET_IPCRENDERERKEY,
+    TARGET_ONIPCRECEIVE,
+    INPUTGROUP_IPCRENDERERKEY,
+    TIMERECORD_IPCRENDERERKEY,
+    TIMERECORD_ONIPCRECEIVE,
+    INPUTGROUP_ONIPCRECEIVE,
+    SYSTEM_IPCRENDERERKEY
+} from './store/mutation-types'
 //这里是所有ipc通知的入口点
 import {EventBus} from './Events'
+
 if (electron) {
     electron.ipcRenderer.on(TARGET_IPCRENDERERKEY, (event, args, res) => {
-        console.log("ipc", 'receive targetRenderer',args ,res);
-        store.dispatch(TARGET_ONIPCRECEIVE,{
-           args: args,
-           res: res
+        console.log("ipc", 'receive targetRenderer', args, res);
+        store.dispatch(TARGET_ONIPCRECEIVE, {
+            args: args,
+            res: res
         });
     });
     electron.ipcRenderer.on(INPUTGROUP_IPCRENDERERKEY, (event, args, res) => {
         // console.log("ipc", 'receive inputGroupRenderer',args ,res);
-        store.dispatch(INPUTGROUP_ONIPCRECEIVE,{
+        store.dispatch(INPUTGROUP_ONIPCRECEIVE, {
+            args: args,
+            res: res
+        });
+    });
+    electron.ipcRenderer.on(TIMERECORD_IPCRENDERERKEY, (event, args, res) => {
+        // console.log("ipc", 'receive timeRecordRenderer',args ,res);
+        store.dispatch(TIMERECORD_ONIPCRECEIVE, {
             args: args,
             res: res
         });
     });
     electron.ipcRenderer.on(SYSTEM_IPCRENDERERKEY, (event, args, res) => {
-        console.log("ipc", 'receive SYSTEM_IPCRENDERERKEY',args ,res);
-        EventBus.$emit('system',args);
+        console.log("ipc", 'receive SYSTEM_IPCRENDERERKEY', args, res);
+        EventBus.$emit('system', args);
     })
 }
 

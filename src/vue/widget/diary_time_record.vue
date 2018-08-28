@@ -32,8 +32,14 @@
     import Diary_section_header from "./diary_section_header";
     import s_time_record_input from './semantic/s_time_record_input';
 
-    const rendererKey = 'timeRecordRenderer';
-    const ipcKey = 'timeRecord';
+    import {
+        TIMERECORD_GETOBJ,
+        TIMERECORD_SENDIPC,
+        TIMERECORD_REMOVEIPC,
+        METHOD_GET,
+        METHOD_CREATE,
+        METHOD_DELETE
+    } from '../../store/mutation-types'
     export default {
         name: "diary_time_record",
         components: {
@@ -62,7 +68,22 @@
                 if (newVal !== oldVal) {
                     this.initData();
                 }
+            },
+            recordObj: {
+                handler: function (newVal) {
+                    console.log("recordObj", newVal);
+                    if (newVal) {
+                        this.dataList = newVal;
+                    }
+                },
+                deep: true,
+                immediate: true
             }
+        },
+        computed: {
+            recordObj: function () {
+                return this.$store.getters[TIMERECORD_GETOBJ](this.date);
+            },
         },
         props: {
             date: {
@@ -93,58 +114,31 @@
             },
             save: function () {
                 if (this.isChange()) {
-                    if (this.$electron) {
-                        this.$electron.ipcRenderer.send(ipcKey, {
-                            method: 'create',
-                            time: this.date,
-                            data: this.dataList.map(item => {
-                                return {
-                                    start: item.start,
-                                    end: item.end,
-                                    event: item.event,
-                                    remark: item.remark
-                                }
-                            })
-                        });
-                    }
+                    this.$store.dispatch(TIMERECORD_SENDIPC , {
+                        method: METHOD_CREATE,
+                        time: this.date,
+                        data: this.dataList.map(item => {
+                            return {
+                                start: item.start,
+                                end: item.end,
+                                event: item.event,
+                                remark: item.remark
+                            }
+                        })
+                    });
                     this.parseResult = JSON.stringify(this.dataList);
                 }
             },
             del: function () {
-                if (this.$electron) {
-                    this.$electron.ipcRenderer.send(ipcKey, {
-                        method: 'delete',
-                        time: this.date,
-                    });
-                }
+                this.$store.dispatch(TIMERECORD_SENDIPC , {
+                    method: METHOD_DELETE,
+                    time: this.date
+                });
             },
             isEmpty: function () {
                 return this.dataList.filter(item => {
                     return item.start && item.end;
                 }).length === 0;
-            },
-            onGet: function (res) {
-                if (res) {
-                    this.dataList = res.data;
-                } else {
-                    this.initDefault();
-                }
-            },
-            onRenderer: function () {
-                if (!this.$electron) {
-                    return;
-                }
-                this.$electron.ipcRenderer.on(rendererKey, (event, args, res) => {
-                    let method = args.method;
-                    if (method === 'get') {
-                        this.onGet(res);
-                    } else if (method === 'delete') {
-                        //删除
-                        this.initDefault();
-                    } else if (method === 'create') {
-                    }
-
-                })
             },
             updateTime: function (index, args) {
                 let itemData = args[0];//当前行对象
@@ -160,13 +154,6 @@
                     //第二行发生了改变
                     this.$set(this.pickRange, 'start', itemData.start ? itemData.start : '05:00');
                 }
-                // if (itemData.end) {
-                //     this.$set(this.pickRange, 'start', itemData.end);
-                // } else if (itemData.start) {
-                //     this.$set(this.pickRange, 'start', itemData.start);
-                // }else {
-                //     this.$set(this.pickRange, 'start', '05:00');
-                // }
                 if (index < this.dataList.length - 1) {
                     //把当前行的end时间设置为下一行的start
                     let nextData = this.dataList[index + 1];
@@ -177,25 +164,10 @@
             initData: function () {
                 //恢复时间间隔
                 this.$set(this.pickRange, 'start', '05:00');
-                if (this.$electron) {
-                    this.$electron.ipcRenderer.send(ipcKey, {
-                        method: 'get',
-                        time: this.date,
-                    });
-                } else {
-                    this.initDefault();
-                }
-            },
-            initDefault: function () {
-                this.dataList = [];
-                for (let i = 0; i < 15; i++) {
-                    this.dataList.push({
-                        start: '',
-                        end: '',
-                        event: '',
-                        remark: ''
-                    })
-                }
+                this.$store.dispatch(TIMERECORD_SENDIPC , {
+                    method: METHOD_GET,
+                    time: this.date
+                });
             },
             addNewLine: function () {
                 //设置时间
@@ -216,8 +188,10 @@
             }
         },
         mounted: function () {
-            this.onRenderer();
             this.initData();
+        },
+        beforeDestroy: function () {
+            this.$store.dispatch(TIMERECORD_REMOVEIPC);
         }
     }
 </script>

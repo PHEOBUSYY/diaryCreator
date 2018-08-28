@@ -62,7 +62,7 @@
         TARGET_REMOVEIPC,
         TARGET_COPY,
         TARGET_AFTERSAVE,
-        TARGET_GETTARGETOBJ,
+        TARGET_GETOBJ,
         TARGET_GETSAVE,
         METHOD_GET,
         METHOD_CREATE,
@@ -116,7 +116,7 @@
                 })
             },
             targetObj: function () {
-                return this.$store.getters[TARGET_GETTARGETOBJ](this.realTime);
+                return this.$store.getters[TARGET_GETOBJ](this.realTime);
             },
             saveState: function () {
                 return this.$store.getters[TARGET_GETSAVE](this.realTime);

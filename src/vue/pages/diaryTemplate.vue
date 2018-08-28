@@ -39,7 +39,6 @@
     import Diary_photos from "../widget/diary_photos";
     import {EventBus} from "../../Events";
 
-    const ipcKey = 'schedule';
     export default {
         components: {
             Diary_photos,

@@ -29,7 +29,7 @@
 
     import {
         TARGET_SENDIPC,
-        TARGET_GETTARGETOBJ,
+        TARGET_GETOBJ,
         METHOD_GET
     } from '../../store/mutation-types'
     
@@ -70,7 +70,7 @@
         },
         computed: {
             targetObj: function () {
-                return this.$store.getters[TARGET_GETTARGETOBJ](this.realTime);
+                return this.$store.getters[TARGET_GETOBJ](this.realTime);
             },
             realTime: function () {
                 let date = new Date(this.date);
