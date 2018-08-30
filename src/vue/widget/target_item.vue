@@ -1,8 +1,8 @@
 <template>
     <div class="group">
         <div class="ui fluid right labeled input ">
-            <div class="ui label teal" @click="starChange">
-                <i class="star icon" style="margin:0" :class="value.star ? '':'outline'"></i>
+            <div class="ui label teal" @click="changeCheck">
+                <i class="icon" style="margin:0" :class="value.checked ? 'calendar check':'calendar outline'"></i>
             </div>
             <input type="text" placeholder="写点什么吧" v-model="value.text"
                    @input="inputChange($event.target.value)">
@@ -58,10 +58,9 @@
                 this.dropdown.dropdown({
                     transition: 'drop',
                     values: dropdownEvent,
-                    onChange: (dvalue, text, $selectedItem) => {
+                    onChange: (value) => {
                         //监听选中
-                        // console.log("dropdown", dvalue);
-                        this.value.type = Number.parseInt(dvalue)
+                        this.value.type = Number.parseInt(value)
                     }
                 })
             },
@@ -69,8 +68,8 @@
                 this.value.text = value;
                 this.$emit('input', this.value);
             },
-            starChange: function () {
-                this.value.star = !this.value.star;
+            changeCheck: function () {
+                this.value.checked = !this.value.checked;
                 this.$emit('input', this.value);
             }
         },
@@ -83,6 +82,7 @@
                 type: Object,
                 default: function () {
                     return {
+                        checked: false,
                         star: false,
                         editable: false,
                         type: 0,

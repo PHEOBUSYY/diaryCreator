@@ -6,13 +6,13 @@
                  v-for="(item, index) in weekTarget" :key="'target_week_'+index"
                  v-model="weekTarget[index].text"></s_input>
         <diary_section_header title="今日目标"></diary_section_header>
-        <s_input disabled fluid color="teal" :label="index+1+''" :id="'target_toady_'+index"
-                 v-for="(item, index) in todayTarget" :key="'target_today_'+index"
-                 v-model="todayTarget[index].text"></s_input>
+        <s_input disabled fluid color="teal" :label="index2+1+''" :id="'target_toady_'+index2"
+                 v-for="(item, index2) in todayTarget" :key="'target_today_'+index2"
+                 v-model="todayTarget[index2].text"></s_input>
         <diary_section_header title="明日目标"></diary_section_header>
-        <s_input disabled fluid color="teal" :label="index+1+''" :id="'target_tomorrow_'+index"
-                 v-for="(item, index) in tomorrowTarget" :key="'target_tomorrow_'+index"
-                 v-model="tomorrowTarget[index].text"></s_input>
+        <s_input disabled fluid color="teal" :label="index3+1+''" :id="'target_tomorrow_'+index3"
+                 v-for="(item, index3) in tomorrowTarget" :key="'target_tomorrow_'+index3"
+                 v-model="tomorrowTarget[index3].text"></s_input>
         <!--<div v-if="output" v-html="show" style="text-align: left">-->
         <!--</div>-->
         <div v-if="!weekTarget || weekTarget.length===0">
@@ -32,7 +32,7 @@
         TARGET_GETOBJ,
         METHOD_GET
     } from '../../store/mutation-types'
-    
+
     export default {
         components: {S_input, diary_section_header},
         data: function () {
@@ -87,8 +87,8 @@
             },
             generateSingleLine: function (prefix, item) {
                 //生成的单行格式
-                if (item.star) {
-                    return '- [ ] <font color=1cb5ac>' + prefix + '. ' + item.text + '</font>\r\n'
+                if (item.checked) {
+                    return '- [X]' + prefix + '. ' + item.text + '\r\n'
                 } else {
                     return '- [ ] ' + prefix + '. ' + item.text + '\r\n'
                 }
@@ -114,8 +114,8 @@
                     let output = '\r\n';
                     output += '### 本周目标\r\n';
                     for (let i = 0; i < targetList.length; i++) {
-                        targetList[i].output = this.generateSingleLine(i + 1, targetList[i]);
-                        output += targetList[i].output;
+                        // targetList[i].output = this.generateSingleLine(i + 1, targetList[i]);
+                        output += this.generateSingleLine(i + 1, targetList[i]);
                     }
                     this.weekTarget = targetList;
                     output += '\r\n';
@@ -140,8 +140,10 @@
                     });
                     output += '### 今日目标\r\n';
                     if (result[weekDay]) {
+                        let index = 1;
                         result[weekDay].forEach(item => {
-                            output += item.output;
+                            output += this.generateSingleLine(index, item);
+                            index ++;
                         });
                         this.todayTarget = result[weekDay];
                     }
@@ -149,8 +151,10 @@
                     if (weekDay + 1 < result.length) {
                         output += '### 明日目标\r\n';
                         if (result[weekDay + 1]) {
+                            let index = 1;
                             result[weekDay + 1].forEach(item => {
-                                output += item.output;
+                                output += this.generateSingleLine(index, item);
+                                index ++;
                             });
                             this.tomorrowTarget = result[weekDay + 1];
                         }

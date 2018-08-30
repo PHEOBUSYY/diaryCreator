@@ -9,7 +9,6 @@ import {
     COPY,
     AFTERSAVE,
     GETOBJ,
-    GETSAVE,
     METHOD_GET,
     METHOD_CREATE,
     METHOD_DELETE
@@ -36,7 +35,7 @@ export default {
                 Vue.set(state.targets, time, initDefault());
             } else if (method === METHOD_CREATE) {
                 //保存成功
-                EventBus.$emit('afterSave');
+                EventBus.$emit(AFTERSAVE);
             }
         },
         [COPY]: function (state, payload) {
@@ -89,7 +88,8 @@ function initDefault() {
             star: false,
             editable: false,
             type: 0,
-            week: []
+            week: [],
+            checked: false
         })
     }
     data.summary = {
@@ -115,6 +115,7 @@ function onGet(state, time, res) {
     if (res && res.targets) {
         result.targetList = res.targets.map(item => {
             return {
+                checked: item.checked,
                 text: item.text,
                 star: item.star,
                 editable: item.editable,

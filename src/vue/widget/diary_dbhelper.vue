@@ -84,7 +84,9 @@
                 if (this.dataList.length > 0) {
                     result += '### ' + this.title + '\n\n';
                     this.dataList.forEach(item => {
-                        result += '- ' + item.value + "\n";
+                        if (item.value) {
+                            result += '- ' + item.value + "\n";
+                        }
                     });
                     result += '\n';
                 }
@@ -130,7 +132,7 @@
             },
             onGet: function (resultList) {
                 this.dataList = [];
-                
+
                 if (resultList && resultList.length > 0) {
                     for (let i = 0; i < resultList.length; i++) {
                         let item = resultList[i];

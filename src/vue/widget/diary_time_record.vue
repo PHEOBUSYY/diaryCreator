@@ -151,7 +151,7 @@
                     }
                 } else {
                     //第二行发生了改变
-                    this.$set(this.pickRange, 'start', itemData.start ? itemData.start : '05:00');
+                    this.$set(this.pickRange, 'start', itemData.end ? itemData.end : '05:00');
                 }
                 if (index < this.dataList.length - 1) {
                     //把当前行的end时间设置为下一行的start
