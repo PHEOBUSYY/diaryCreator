@@ -190,7 +190,6 @@
             this.initData();
         },
         beforeDestroy: function () {
-            this.$store.dispatch(TIMERECORD_REMOVEIPC);
         }
     }
 </script>

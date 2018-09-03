@@ -35,6 +35,7 @@ export default {
                 Vue.set(state.targets, time, initDefault());
             } else if (method === METHOD_CREATE) {
                 //保存成功
+                console.log("aftersave!!!!");
                 EventBus.$emit(AFTERSAVE);
             }
         },

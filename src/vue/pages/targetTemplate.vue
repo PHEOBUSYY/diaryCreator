@@ -59,7 +59,6 @@
     import {EventBus} from "../../Events";
     import {
         TARGET_SENDIPC,
-        TARGET_REMOVEIPC,
         TARGET_COPY,
         TARGET_GETOBJ,
         METHOD_GET,
@@ -252,7 +251,6 @@
             }
         },
         beforeDestroy: function () {
-            this.$store.dispatch(TARGET_REMOVEIPC);
             EventBus.$off();
         },
         mounted: function () {
