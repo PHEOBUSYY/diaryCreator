@@ -80,7 +80,7 @@ export default {
 
 function initDefault() {
     let dataList = [];
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 5; i++) {
         dataList.push({
             start: '',
             end: '',

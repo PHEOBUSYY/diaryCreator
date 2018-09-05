@@ -18,7 +18,7 @@
             </div>
             <diary-title :date="date" ref="diary_title"></diary-title>
             <diary_achievement :date="date" ref="diary_achievement"></diary_achievement>
-            <diary_time_record :date="date" ref="diary_time_record"></diary_time_record>
+            <diary_time_record2 :date="date" ref="diary_time_record"></diary_time_record2>
             <diary_target :date="date" ref="diary_target"></diary_target>
             <diary_inspiration :date="date" ref="diary_inspiration"></diary_inspiration>
             <diary_photos :date="date" ref="diary_photos"></diary_photos>
@@ -33,7 +33,7 @@
 <script>
     import diary_target from '../widget/diary_target.vue'
     import diaryTitle from '../widget/diary_title';
-    import diary_time_record from '../widget/diary_time_record';
+    import diary_time_record2 from '../widget/diary_time_record_2';
     import diary_inspiration from '../widget/diary_inspiration';
     import diary_achievement from '../widget/diary_achievement';
     import Diary_photos from "../widget/diary_photos";
@@ -48,7 +48,7 @@
             Diary_photos,
             diary_target,
             diaryTitle,
-            diary_time_record,
+            diary_time_record2,
             diary_inspiration,
             diary_achievement,
         },
