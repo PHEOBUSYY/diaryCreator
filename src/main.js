@@ -55,6 +55,7 @@ import {
     TIMERECORD_IPCRENDERERKEY,
     TIMERECORD_ONIPCRECEIVE,
     INPUTGROUP_ONIPCRECEIVE,
+    SYSTEM,
     SYSTEM_IPCRENDERERKEY
 } from './store/mutation-types'
 //这里是所有ipc通知的入口点
@@ -84,7 +85,7 @@ if (electron) {
     });
     electron.ipcRenderer.on(SYSTEM_IPCRENDERERKEY, (event, args, res) => {
         console.log("ipc", 'receive SYSTEM_IPCRENDERERKEY', args, res);
-        EventBus.$emit('system', args);
+        EventBus.$emit(SYSTEM, args);
     })
 }
 

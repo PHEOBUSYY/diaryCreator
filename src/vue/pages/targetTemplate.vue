@@ -67,7 +67,9 @@
         SYSTEM,
         AFTERSAVE,
         PRE,
-        NEXT
+        NEXT,
+        QUIT,
+        SYSTEM_QUIT
     } from '../../store/mutation-types'
 
     //目标就是把所有关于electron ipc的逻辑都放在后面的vux中，触发事件通过action来完成，解析结果在main.js中
@@ -259,6 +261,9 @@
                     this.preWeek();
                 }else if(data.action === NEXT){
                     this.nextWeek();
+                }else if(data.action === QUIT){
+                    this.save();
+                    this.$store.dispatch(SYSTEM_QUIT);
                 }
             });
             EventBus.$on(AFTERSAVE, () => {

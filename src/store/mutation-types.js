@@ -22,7 +22,8 @@ export const GETSAVE = 'getSave';
 export const GETOBJ = 'getobj';
 export const PRE = 'pre';
 export const NEXT = 'next';
-
+export const AUTOSAVE = 'autosave';
+export const QUIT = 'quit';
 
 export const TARGET_IPCKEY = TARGET;
 export const TARGET_IPCRENDERERKEY = TARGET + RENDERER;
@@ -48,7 +49,7 @@ export const INPUTGROUP_ONIPCRECEIVE = INPUTGROUP + '/' + ONIPCRECEIVE;
 
 export const SYSTEM_IPCKEY = SYSTEM;
 export const SYSTEM_IPCRENDERERKEY = SYSTEM + RENDERER;
-
+export const SYSTEM_QUIT = SYSTEM + '/' + QUIT;
 
 
 export const TIMERECORD_IPCKEY = TIMERECORD;

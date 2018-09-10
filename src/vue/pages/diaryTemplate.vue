@@ -41,7 +41,10 @@
     import {
         SYSTEM,
         PRE,
-        NEXT
+        NEXT,
+        AUTOSAVE,
+        QUIT,
+        SYSTEM_QUIT
     } from '../../store/mutation-types'
     export default {
         components: {
@@ -191,6 +194,12 @@
                     this.preDay();
                 }else if(data.action === NEXT){
                     this.nextDay();
+                }else if(data.action === AUTOSAVE){
+                    this.generate(true);
+                }else if(data.action === QUIT){
+                    this.generate(true);
+                    console.log("eventbus system", SYSTEM_QUIT);
+                    this.$store.dispatch(SYSTEM_QUIT);
                 }
             });
         },
