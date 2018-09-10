@@ -10,11 +10,14 @@
                  v-for="(item, index2) in todayTarget" :key="'target_today_'+index2"
                  v-model="todayTarget[index2].text"></s_input>
         <diary_section_header title="明日目标"></diary_section_header>
-        <s_input disabled fluid color="teal" :label="index3+1+''" :id="'target_tomorrow_'+index3"
+        <s_input fluid color="teal" :label="index3+1+''" :id="'target_tomorrow_'+index3"
                  v-for="(item, index3) in tomorrowTarget" :key="'target_tomorrow_'+index3"
                  v-model="tomorrowTarget[index3].text"></s_input>
-        <!--<div v-if="output" v-html="show" style="text-align: left">-->
-        <!--</div>-->
+        <button v-if="tomorrowTarget.length > 0"
+                class="mini ui basic button teal"
+                @click="addNew"
+        >add
+        </button>
         <div v-if="!weekTarget || weekTarget.length===0">
             还没有设置本周目标,
             <router-link to="/targetTemplate">
@@ -30,7 +33,8 @@
     import {
         TARGET_SENDIPC,
         TARGET_GETOBJ,
-        METHOD_GET
+        METHOD_GET,
+        METHOD_CREATE
     } from '../../store/mutation-types'
 
     export default {
@@ -39,10 +43,10 @@
             return {
                 weekDays: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'],
                 output: '',
+                targetList: [],
                 weekTarget: [],
                 todayTarget: [],
                 tomorrowTarget: [],
-                show: ''
             }
         },
         props: {
@@ -61,7 +65,8 @@
             targetObj: {
                 handler: function (newVal) {
                     if (newVal) {
-                        this.onGet(newVal.targetList);
+                        this.targetList = newVal.targetList;
+                        this.onGet();
                     }
                 },
                 deep: true,
@@ -94,6 +99,24 @@
                 }
             },
             parse: function () {
+                this.save();
+                let output = '\r\n';
+                output += '### 本周目标\r\n';
+                for (let i = 0; i < this.targetList.length; i++) {
+                    output += this.generateSingleLine(i + 1, this.targetList[i]);
+                }
+                output += '\r\n';
+                output += '### 今日目标\r\n';
+                for (let i = 0; i < this.todayTarget.length; i++) {
+                    output += this.generateSingleLine(i + 1, this.todayTarget[i]);
+                }
+                output += '\r\n';
+                output += '### 明日目标\r\n';
+                for (let i = 0; i < this.tomorrowTarget.length; i++) {
+                    output += this.generateSingleLine(i + 1, this.tomorrowTarget[i]);
+                }
+                output += '\r\n';
+                this.output = output;
                 return this.output;
             },
             isChange: function () {
@@ -105,22 +128,15 @@
             isEmpty: function () {
                 return true;
             },
-            onGet: function (targetList) {
+            onGet: function () {
                 //获取当前时间
                 let date = new Date(this.date);
                 let weekDay = date.getDay();
                 //取到了本周的计划列表
-                if (targetList && targetList.length > 0) {
-                    let output = '\r\n';
-                    output += '### 本周目标\r\n';
-                    for (let i = 0; i < targetList.length; i++) {
-                        // targetList[i].output = this.generateSingleLine(i + 1, targetList[i]);
-                        output += this.generateSingleLine(i + 1, targetList[i]);
-                    }
-                    this.weekTarget = targetList;
-                    output += '\r\n';
+                if (this.targetList && this.targetList.length > 0) {
+                    this.weekTarget = this.targetList;
                     let result = [];
-                    targetList.forEach(item => {
+                    this.targetList.forEach(item => {
                         if (item.week && item.week.length > 0) {
                             let weekArray = item.week;
                             weekArray.forEach(weekDay => {
@@ -138,33 +154,49 @@
                             result[othersIndex].push(item);
                         }
                     });
-                    output += '### 今日目标\r\n';
                     if (result[weekDay]) {
-                        let index = 1;
-                        result[weekDay].forEach(item => {
-                            output += this.generateSingleLine(index, item);
-                            index ++;
-                        });
                         this.todayTarget = result[weekDay];
                     }
-                    output += '\r\n';
                     if (weekDay + 1 < result.length) {
-                        output += '### 明日目标\r\n';
                         if (result[weekDay + 1]) {
-                            let index = 1;
-                            result[weekDay + 1].forEach(item => {
-                                output += this.generateSingleLine(index, item);
-                                index ++;
-                            });
                             this.tomorrowTarget = result[weekDay + 1];
                         }
                     }
-                    output += '\r\n';
-                    this.output = output;
-                    this.show = output.replace(/\r\n/g, '<br>').replace(/\- \[ \] /g, '').replace(/### /g, '');
-                    // console.log("output", output);
                 }
             },
+            addNew: function () {
+                let date = new Date(this.date);
+                let weekDay = date.getDay();
+                this.tomorrowTarget.push({
+                    text: '',
+                    star: false,
+                    editable: false,
+                    type: 0,
+                    week: [this.weekDays[weekDay+1]],
+                    checked: false
+                });
+            },
+            save: function () {
+                let newList = [];
+                this.tomorrowTarget.forEach(item => {
+                    let find = false;
+                    for(let i =0;i< this.targetList.length;i++){
+                        if(item.text === this.targetList[i].text){
+                            find = true;
+                        }
+                    }
+                    if(!find){
+                        newList.push(item);
+                    }
+                });
+                this.targetList = this.targetList.concat(newList);
+                this.$store.dispatch(TARGET_SENDIPC , {
+                    method: METHOD_CREATE,
+                    time: this.realTime,
+                    targets: this.targetList,
+                    summary: {}
+                });
+            }
         },
         mounted: function () {
             this.getTarget();

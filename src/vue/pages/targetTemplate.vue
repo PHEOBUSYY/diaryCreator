@@ -185,11 +185,6 @@
             },
             generateSingleLine: function (prefix, item) {
                 //生成的单行格式
-                // if (item.star) {
-                //     return '- [ ] <font color=44C0FF>' + prefix + '. ' + item.text + '</font>\r\n'
-                // } else {
-                //     return '- [ ] ' + prefix + '. ' + item.text + '\r\n'
-                // }
                 if (item.checked) {
                     return '- [X] ' + prefix + '. ' + item.text + '\r\n'
                 } else {
