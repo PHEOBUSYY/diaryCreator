@@ -52,6 +52,9 @@ export const SYSTEM_IPCRENDERERKEY = SYSTEM + RENDERER;
 export const SYSTEM_QUIT = SYSTEM + '/' + QUIT;
 export const PRE_ROUTER = PRE + '_' + ROUTER;
 export const NEXT_ROUTER = NEXT + '_' + ROUTER;
+export const ONSHOW = 'onShow';
+export const ONFOCUS = 'onFocus';
+export const ONBLUR = 'onBlur';
 
 export const TIMERECORD_IPCKEY = TIMERECORD;
 export const TIMERECORD_IPCRENDERERKEY = TIMERECORD + RENDERER;

@@ -45,7 +45,8 @@
         AUTOSAVE,
         QUIT,
         SYSTEM_QUIT,
-        NEXT_ROUTER
+        NEXT_ROUTER,
+        ONSHOW
     } from '../../store/mutation-types'
     export default {
         components: {
@@ -202,6 +203,11 @@
                     this.$store.dispatch(SYSTEM_QUIT);
                 }else if (data.action === NEXT_ROUTER){
                     this.$router.push({path: '/target'});
+                }else if (data.action === ONSHOW){
+                    let dateStr = new Date().toLocaleDateString();
+                    if(dateStr !== this.date){
+                        this.date = dateStr;
+                    }
                 }
             });
         },

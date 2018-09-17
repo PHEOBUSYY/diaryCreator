@@ -72,6 +72,7 @@
         SYSTEM_QUIT,
         AUTOSAVE,
         PRE_ROUTER,
+        ONSHOW
     } from '../../store/mutation-types'
 
     //目标就是把所有关于electron ipc的逻辑都放在后面的vux中，触发事件通过action来完成，解析结果在main.js中
@@ -99,7 +100,7 @@
                 pickerOptions: {
                     firstDayOfWeek: 1
                 },
-                timeRange: new Date().toDateString(),
+                timeRange: new Date().toLocaleDateString(),
                 generate: ''
             };
         },
@@ -265,6 +266,11 @@
                     this.save();
                 } else if (data.action === PRE_ROUTER){
                     this.$router.push({path: '/'});
+                }else if (data.action === ONSHOW){
+                    let dateStr = new Date().toLocaleDateString();
+                    if(dateStr !== this.timeRange){
+                        this.timeRange = dateStr;
+                    }
                 }
             });
             EventBus.$on(AFTERSAVE, () => {
