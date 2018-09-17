@@ -1,5 +1,11 @@
 <template>
     <div style="width: 100%;display: flex;flex-direction: column;justify-content: center">
+        <diary_section_header title="本周主题"></diary_section_header>
+        <s_input color="teal" label="1" id="summary_theme"
+                 v-model="value.theme" style="margin: 5px 0"></s_input>
+        <diary_section_header title="本周照片"></diary_section_header>
+        <s_input color="teal" label="1" id="summary_photo"
+                 v-model="value.photo" style="margin: 5px 0"></s_input>
         <diary_section_header title="本周成就"></diary_section_header>
         <s_input disabled fluid color="teal" :label="(index+1)+''" :id="'summary'+index"
                  v-for="(item, index) in dataList" :key="'summary'+index"
@@ -53,7 +59,9 @@
                                 value: ''
                             }],
                         overall: '',
-                        score: ''
+                        score: '',
+                        theme: '',
+                        photo: ''
                     }
                 }
             }
@@ -105,6 +113,18 @@
             },
             parse: function () {
                 let result = '## 总结\r\n';
+                if(this.value && this.value.theme){
+                    result += '\r\n';
+                    result += '### 本周主题\r\n';
+                    result += this.value.theme;
+                    result += '\r\n';
+                }
+                if(this.value && this.value.photo){
+                    result += '\r\n';
+                    result += '### 本周照片\r\n';
+                    result += this.value.photo;
+                    result += '\r\n';
+                }
                 if(this.dataList && this.dataList.length > 0){
                     result += '\r\n';
                     result += '### 本周成就\r\n';

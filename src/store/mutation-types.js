@@ -45,12 +45,13 @@ export const INPUTGROUP_GETOBJ = INPUTGROUP + '/' + GETOBJ;
 export const INPUTGROUP_ONIPCRECEIVE = INPUTGROUP + '/' + ONIPCRECEIVE;
 
 
-
+export const ROUTER = 'router';
 
 export const SYSTEM_IPCKEY = SYSTEM;
 export const SYSTEM_IPCRENDERERKEY = SYSTEM + RENDERER;
 export const SYSTEM_QUIT = SYSTEM + '/' + QUIT;
-
+export const PRE_ROUTER = PRE + '_' + ROUTER;
+export const NEXT_ROUTER = NEXT + '_' + ROUTER;
 
 export const TIMERECORD_IPCKEY = TIMERECORD;
 export const TIMERECORD_IPCRENDERERKEY = TIMERECORD + RENDERER;

@@ -1,20 +1,14 @@
 import diaryTemplate from './vue/pages/diaryTemplate.vue';
 import targetTemplate from './vue/pages/targetTemplate.vue'
-import todayTarget from './vue/widget/diary_target.vue'
 export default [
     {
         path: '/',
-        name: 'diaryTemplate',
+        name: 'diary',
         component: diaryTemplate
     },
     {
-        path: '/targetTemplate',
-        name: 'targetTemplate',
+        path: '/target',
+        name: 'target',
         component: targetTemplate
-    },
-    {
-        path: '/todayTarget',
-        name: 'todayTarget',
-        component: todayTarget
     }
 ]

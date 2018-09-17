@@ -69,7 +69,9 @@
         PRE,
         NEXT,
         QUIT,
-        SYSTEM_QUIT
+        SYSTEM_QUIT,
+        AUTOSAVE,
+        PRE_ROUTER,
     } from '../../store/mutation-types'
 
     //目标就是把所有关于electron ipc的逻辑都放在后面的vux中，触发事件通过action来完成，解析结果在main.js中
@@ -163,7 +165,7 @@
                 })
             },
             save: function () {
-                this.$store.dispatch(TARGET_SENDIPC , {
+                this.$store.dispatch(TARGET_SENDIPC, {
                     method: METHOD_CREATE,
                     time: this.realTime,
                     targets: this.realData,
@@ -252,13 +254,17 @@
         },
         mounted: function () {
             EventBus.$on(SYSTEM, (data) => {
-                if(data.action === PRE){
+                if (data.action === PRE) {
                     this.preWeek();
-                }else if(data.action === NEXT){
+                } else if (data.action === NEXT) {
                     this.nextWeek();
-                }else if(data.action === QUIT){
+                } else if (data.action === QUIT) {
                     this.save();
                     this.$store.dispatch(SYSTEM_QUIT);
+                } else if (data.action === AUTOSAVE) {
+                    this.save();
+                } else if (data.action === PRE_ROUTER){
+                    this.$router.push({path: '/'});
                 }
             });
             EventBus.$on(AFTERSAVE, () => {

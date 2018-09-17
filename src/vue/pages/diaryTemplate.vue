@@ -6,7 +6,7 @@
                 <a class="section labeled teal active">首页</a>
                 <div class="divider"> |</div>
                 <a class="section labeled teal " href="#"
-                   @click="$router.push({path: '/targetTemplate'})">
+                   @click="$router.push({path: '/target'})">
                     目标
                 </a>
             </div>
@@ -44,7 +44,8 @@
         NEXT,
         AUTOSAVE,
         QUIT,
-        SYSTEM_QUIT
+        SYSTEM_QUIT,
+        NEXT_ROUTER
     } from '../../store/mutation-types'
     export default {
         components: {
@@ -198,8 +199,9 @@
                     this.generate(true);
                 }else if(data.action === QUIT){
                     this.generate(true);
-                    console.log("eventbus system", SYSTEM_QUIT);
                     this.$store.dispatch(SYSTEM_QUIT);
+                }else if (data.action === NEXT_ROUTER){
+                    this.$router.push({path: '/target'});
                 }
             });
         },

@@ -106,7 +106,9 @@ function initDefault() {
             }
         ],
         overall: '',
-        score: ''
+        score: '',
+        theme: '',
+        photo: ''
     };
     return data;
 }
@@ -126,6 +128,8 @@ function onGet(state, time, res) {
         });
         result.summary = {};
         result.summary.score = res.summary.score;
+        result.summary.theme = res.summary.theme;
+        result.summary.photo = res.summary.photo;
         result.summary.overall = res.summary.overall;
         result.summary.improve = res.summary.improve.map(item => {
             return {
