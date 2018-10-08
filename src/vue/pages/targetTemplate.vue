@@ -31,8 +31,8 @@
         </button>
         <target_week_summary v-if="timeRange" :date="realTime"
                              v-model="summary" ref="summary"></target_week_summary>
-        <div class="bottom-btn" v-if="timeRange  && targetList.length>0">
-            <button class="ui button teal make" v-if="realData.length > 0"
+        <div class="bottom-btn" v-if="timeRange">
+            <button class="ui button teal make"
                     @click="dialogVisible = true">clear
             </button>
             <button class="ui button teal make" @click="save" v-if="realData.length > 0">OK
@@ -169,7 +169,7 @@
                 this.$store.dispatch(TARGET_SENDIPC, {
                     method: METHOD_CREATE,
                     time: this.realTime,
-                    targets: this.realData,
+                    targets: this.realData && this.realData.length > 0 ? this.realData: null,
                     summary: this.summary
                 });
             },

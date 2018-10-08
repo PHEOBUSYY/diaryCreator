@@ -71,7 +71,7 @@ export default {
         [GETOBJ]: (state) => (time) => {
             let data = state.targets[time];
             //数据初始化
-            if (!data) {
+            if (!data || !data.targets || data.targets.length  === 0) {
                 data = initDefault();
             }
             return data;
