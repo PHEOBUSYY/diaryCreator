@@ -57,7 +57,6 @@
             },
             recordObj: {
                 handler: function (newVal) {
-                    console.log("timeRecord", newVal);
                     if (newVal) {
                         this.dataList = newVal;
                     }
@@ -116,7 +115,6 @@
                     }
                 });
                 result += '\n';
-                console.log("result", result);
                 return result;
             },
             isChange: function () {

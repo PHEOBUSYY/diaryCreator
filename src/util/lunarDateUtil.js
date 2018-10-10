@@ -19,7 +19,6 @@ document.write(ld.lYear + "（" + ld.aYear + "）年" + ld.lMonth + "月" + ld.l
 
 var dt = new Date(2018, 6, 3, 15, 0); // 注意第二个参数月的范围是 [0, 11]
 var ld = new LunarDate(dt);
-console.log("lunar",ld.lYear + "（" + ld.aYear + "）年" + ld.lMonth + "月" + ld.lDay + ld.lHour + "时");
 
 function LunarDate(dt) {
     this.dt = dt;

@@ -63,7 +63,7 @@ import {EventBus} from './Events'
 
 if (electron) {
     electron.ipcRenderer.on(TARGET_IPCRENDERERKEY, (event, args, res) => {
-        console.log("ipc", 'receive targetRenderer', args, res);
+        // console.log("ipc", 'receive targetRenderer', args, res);
         store.dispatch(TARGET_ONIPCRECEIVE, {
             args: args,
             res: res
@@ -84,7 +84,7 @@ if (electron) {
         });
     });
     electron.ipcRenderer.on(SYSTEM_IPCRENDERERKEY, (event, args, res) => {
-        console.log("ipc", 'receive SYSTEM_IPCRENDERERKEY', args, res);
+        // console.log("ipc", 'receive SYSTEM_IPCRENDERERKEY', args, res);
         EventBus.$emit(SYSTEM, args);
     })
 }

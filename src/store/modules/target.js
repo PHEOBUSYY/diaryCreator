@@ -35,7 +35,6 @@ export default {
                 Vue.set(state.targets, time, initDefault());
             } else if (method === METHOD_CREATE) {
                 //保存成功
-                console.log("aftersave!!!!");
                 EventBus.$emit(AFTERSAVE);
             }
         },
@@ -71,20 +70,25 @@ export default {
         [GETOBJ]: (state) => (time) => {
             let data = state.targets[time];
             //数据初始化
-            if (!data || !data.targets || data.targets.length  === 0) {
+            if(!data){
                 data = initDefault();
+            }else {
+                if(!data.targetList || data.targetList.length === 0){
+                    data.targetList = initDefaultTargetList();
+                }
+                if(!data.summary){
+                    data.summary = initDefaultSummary();
+                }
             }
             return data;
         }
     }
 
 }
-
-function initDefault() {
-    let data = {};
-    data.targetList = [];
+function initDefaultTargetList() {
+    let result = [];
     for (let i = 0; i < 7; i++) {
-        data.targetList.push({
+        result.push({
             text: '',
             star: false,
             editable: false,
@@ -93,7 +97,10 @@ function initDefault() {
             checked: false
         })
     }
-    data.summary = {
+    return result;
+}
+function initDefaultSummary() {
+    return {
         improve: [
             {
                 value: ''
@@ -110,7 +117,12 @@ function initDefault() {
         theme: '',
         photo: ''
     };
-    return data;
+}
+function initDefault() {
+    return {
+        targetList: initDefaultTargetList(),
+        summary: initDefaultSummary()
+    };
 }
 
 function onGet(state, time, res) {

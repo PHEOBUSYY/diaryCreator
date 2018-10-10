@@ -169,7 +169,7 @@
                 this.$store.dispatch(TARGET_SENDIPC, {
                     method: METHOD_CREATE,
                     time: this.realTime,
-                    targets: this.realData && this.realData.length > 0 ? this.realData: null,
+                    targets: (this.realData && this.realData.length > 0) ? this.realData: null,
                     summary: this.summary
                 });
             },
@@ -239,7 +239,6 @@
                 }
                 output += this.$refs.summary.parse();
                 this.generate = output;
-                console.log("generate result ", output);
                 //拼接总结部分
                 this.$store.commit(TARGET_COPY, {
                     generate: this.generate

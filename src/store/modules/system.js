@@ -8,7 +8,6 @@ export default {
     },
     actions: {
         [QUIT]: function () {
-            console.log("system quit");
             if (global.electron) {
                 global.electron.ipcRenderer.send(ipcKey, {
                     action: QUIT
