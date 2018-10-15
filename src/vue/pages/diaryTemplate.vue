@@ -46,8 +46,13 @@
         QUIT,
         SYSTEM_QUIT,
         NEXT_ROUTER,
-        ONSHOW
+        ONSHOW,
+        CLEAR_CLIPBOARD,
+        ONBLUR,
+        ONFOCUS,
+        COPY
     } from '../../store/mutation-types'
+
     export default {
         components: {
             Diary_photos,
@@ -61,13 +66,13 @@
             return {
                 output: '',
                 date: new Date().toLocaleDateString(),
-                
+                isForeground: true
             }
         },
         methods: {
             //组件内容是否变化
-            isContentChange: function(){
-            
+            isContentChange: function () {
+
             },
             //isAuto 是否为自动保存
             generate: function (isAuto) {
@@ -89,19 +94,19 @@
                 let isChange = false;
                 let isEmpty = true;
                 refs.forEach(item => {
-                    if(!item.isEmpty()){
+                    if (!item.isEmpty()) {
                         isEmpty = false;
                     }
                 });
                 refs.forEach(item => {
-                    if(item !== diary_target && item.isChange()){
+                    if (item !== diary_target && item.isChange()) {
                         isChange = true;
                     }
                 });
                 let msg = '';
-                if(isAuto){
+                if (isAuto) {
                     //自动保存
-                    if(!isEmpty && isChange){
+                    if (!isEmpty && isChange) {
                         refs.forEach(item => {
                             result += item.parse();
                         });
@@ -109,15 +114,15 @@
                         msg = '内容已自动保存';
                         this.showMessage(msg)
                     }
-                }else{
-                    if(!isEmpty){
+                } else {
+                    if (!isEmpty) {
                         refs.forEach(item => {
                             result += item.parse();
                         });
                         this.output = result;
                         msg = '内容已成功粘贴到剪切板';
                         this.showMessage(msg)
-                    }else{
+                    } else {
                         this.$message({
                             message: '请输入内容后再保存',
                             type: 'error'
@@ -125,19 +130,15 @@
                     }
                 }
             },
-            showMessage: function(msg){
-                try {
-                    if (this.$electron) {
-                        this.$electron.clipboard.writeText(this.output);
-                    } else {
-                        document.execCommand("Copy");
-                    }
+            showMessage: function (msg) {
+                if (this.isForeground) {
+                    this.$store.commit(COPY,this.output);
                     this.$message({
                         message: msg,
                         type: 'success'
                     });
-                } catch (e) {
-                    console.log(e);
+                } else {
+                    //undo
                 }
             },
             preDay: function () {
@@ -169,16 +170,16 @@
                 refs.push(diary_photos);
                 let isEmpty = true;
                 refs.forEach(item => {
-                   if(!item.isEmpty()){
-                       isEmpty = false;
-                   }
+                    if (!item.isEmpty()) {
+                        isEmpty = false;
+                    }
                 });
-                if(isEmpty){
+                if (isEmpty) {
                     this.$message({
                         message: '请输入内容后再删除',
                         type: 'error'
                     });
-                }else{
+                } else {
                     refs.forEach(item => {
                         item.del();
                     });
@@ -187,27 +188,33 @@
                         type: 'success'
                     });
                 }
-                
+
             }
         },
         mounted: function () {
             EventBus.$on(SYSTEM, (data) => {
-                if(data.action === PRE){
+                if (data.action === PRE) {
                     this.preDay();
-                }else if(data.action === NEXT){
+                } else if (data.action === NEXT) {
                     this.nextDay();
-                }else if(data.action === AUTOSAVE){
+                } else if (data.action === AUTOSAVE) {
                     this.generate(true);
-                }else if(data.action === QUIT){
+                } else if (data.action === QUIT) {
                     this.generate(true);
                     this.$store.dispatch(SYSTEM_QUIT);
-                }else if (data.action === NEXT_ROUTER){
+                } else if (data.action === NEXT_ROUTER) {
                     this.$router.push({path: '/target'});
-                }else if (data.action === ONSHOW){
+                } else if (data.action === ONSHOW) {
+                    this.isForeground = true;
                     let dateStr = new Date().toLocaleDateString();
-                    if(dateStr !== this.date){
+                    if (dateStr !== this.date) {
                         this.date = dateStr;
                     }
+                } else if (data.action === ONBLUR) {
+                    this.isForeground = false;
+                    // this.$store.commit(CLEAR_CLIPBOARD,this.output);
+                } else if (data.action === ONFOCUS) {
+                    this.isForeground = true;
                 }
             });
         },

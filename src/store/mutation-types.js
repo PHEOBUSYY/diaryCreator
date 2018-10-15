@@ -17,6 +17,7 @@ export const SENDIPC = 'sendIpc';
 export const ONIPCRECEIVE = 'onipcreceive';
 export const REMOVEIPC = 'removeipc';
 export const COPY = 'copy';
+export const CLEAR_CLIPBOARD = 'clear_clipboard';
 export const AFTERSAVE = 'aftersave';
 export const GETSAVE = 'getSave';
 export const GETOBJ = 'getobj';

@@ -6,12 +6,11 @@ import {
     SENDIPC,
     ONIPCRECEIVE,
     REMOVEIPC,
-    COPY,
     AFTERSAVE,
     GETOBJ,
     METHOD_GET,
     METHOD_CREATE,
-    METHOD_DELETE
+    METHOD_DELETE,
 } from '../mutation-types'
 
 const ipcKey = TARGET_IPCKEY;
@@ -37,15 +36,7 @@ export default {
                 //保存成功
                 EventBus.$emit(AFTERSAVE);
             }
-        },
-        [COPY]: function (state, payload) {
-            if (global.electron) {
-                global.electron.clipboard.writeText(payload.generate);
-            } else {
-                //todo 这里通用的copy
-
-            }
-        },
+        }
     },
     actions: {
         [SENDIPC]: function (context, payload) {

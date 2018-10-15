@@ -59,7 +59,8 @@
     import {EventBus} from "../../Events";
     import {
         TARGET_SENDIPC,
-        TARGET_COPY,
+        COPY,
+        CLEAR_CLIPBOARD,
         TARGET_GETOBJ,
         METHOD_GET,
         METHOD_CREATE,
@@ -72,7 +73,9 @@
         SYSTEM_QUIT,
         AUTOSAVE,
         PRE_ROUTER,
-        ONSHOW
+        ONSHOW,
+        ONBLUR,
+        ONFOCUS
     } from '../../store/mutation-types'
 
     //目标就是把所有关于electron ipc的逻辑都放在后面的vux中，触发事件通过action来完成，解析结果在main.js中
@@ -101,7 +104,8 @@
                     firstDayOfWeek: 1
                 },
                 timeRange: new Date().toLocaleDateString(),
-                generate: ''
+                generate: '',
+                isForeground: true
             };
         },
         computed: {
@@ -240,13 +244,13 @@
                 output += this.$refs.summary.parse();
                 this.generate = output;
                 //拼接总结部分
-                this.$store.commit(TARGET_COPY, {
-                    generate: this.generate
-                });
-                this.$message({
-                    message: '计划已粘贴到剪切板',
-                    type: 'success'
-                });
+                if(this.isForeground){
+                    this.$store.commit(COPY, this.generate);
+                    this.$message({
+                        message: '计划已粘贴到剪切板',
+                        type: 'success'
+                    });
+                }
             }
         },
         beforeDestroy: function () {
@@ -266,10 +270,16 @@
                 } else if (data.action === PRE_ROUTER){
                     this.$router.push({path: '/'});
                 }else if (data.action === ONSHOW){
+                    this.isForeground = true;
                     let dateStr = new Date().toLocaleDateString();
                     if(dateStr !== this.timeRange){
                         this.timeRange = dateStr;
                     }
+                }else if(data.action === ONBLUR){
+                    this.isForeground = false;
+                    // this.$store.commit(CLEAR_CLIPBOARD);
+                }else if(data.action === ONFOCUS){
+                    this.isForeground = true;
                 }
             });
             EventBus.$on(AFTERSAVE, () => {
