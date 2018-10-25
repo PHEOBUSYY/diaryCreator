@@ -63,28 +63,28 @@ import {EventBus} from './Events'
 
 if (electron) {
     electron.ipcRenderer.on(TARGET_IPCRENDERERKEY, (event, args, res) => {
-        // console.log("ipc", 'receive targetRenderer', args, res);
+        console.log("ipc", 'receive targetRenderer', args, res);
         store.dispatch(TARGET_ONIPCRECEIVE, {
             args: args,
             res: res
         });
     });
     electron.ipcRenderer.on(INPUTGROUP_IPCRENDERERKEY, (event, args, res) => {
-        // console.log("ipc", 'receive inputGroupRenderer',args ,res);
+        console.log("ipc", 'receive inputGroupRenderer',args ,res);
         store.dispatch(INPUTGROUP_ONIPCRECEIVE, {
             args: args,
             res: res
         });
     });
     electron.ipcRenderer.on(TIMERECORD_IPCRENDERERKEY, (event, args, res) => {
-        // console.log("ipc", 'receive timeRecordRenderer',args ,res);
+        console.log("ipc", 'receive timeRecordRenderer',args ,res);
         store.dispatch(TIMERECORD_ONIPCRECEIVE, {
             args: args,
             res: res
         });
     });
     electron.ipcRenderer.on(SYSTEM_IPCRENDERERKEY, (event, args, res) => {
-        // console.log("ipc", 'receive SYSTEM_IPCRENDERERKEY', args, res);
+        console.log("ipc", 'receive SYSTEM_IPCRENDERERKEY', args, res);
         EventBus.$emit(SYSTEM, args);
     })
 }

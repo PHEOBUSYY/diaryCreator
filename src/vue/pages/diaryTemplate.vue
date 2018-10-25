@@ -24,7 +24,7 @@
             <diary_photos :date="date" ref="diary_photos"></diary_photos>
             
             <button class="ui teal button make" @click="remove">remove</button>
-            <button class="ui teal button make" @click="generate(false)">make</button>
+            <button class="ui teal button make" @click="make">make</button>
         
         </div>
     </div>
@@ -42,15 +42,14 @@
         SYSTEM,
         PRE,
         NEXT,
-        AUTOSAVE,
+        save,
         QUIT,
         SYSTEM_QUIT,
         NEXT_ROUTER,
         ONSHOW,
-        CLEAR_CLIPBOARD,
         ONBLUR,
         ONFOCUS,
-        COPY
+        SYSTEM_COPY
     } from '../../store/mutation-types'
 
     export default {
@@ -64,82 +63,65 @@
         },
         data: function () {
             return {
-                output: '',
                 date: new Date().toLocaleDateString(),
-                isForeground: true
+                refsArray: []
+            }
+        },
+        watch: {
+            date: function (newVal, oldVal) {
+                if(newVal !== oldVal){
+                    this.save();
+                }
             }
         },
         methods: {
-            //组件内容是否变化
-            isContentChange: function () {
-
+            make: function () {
+                this.save();
+                this.generate();
             },
-            //isAuto 是否为自动保存
-            generate: function (isAuto) {
-                let result = '';
+            save: function(){
+                this.refsArray.forEach(ref =>{
+                    if(ref){
+                        ref.save();
+                    }
+                })
+            },
+            clear: function(){
+                this.refsArray.forEach(ref =>{
+                    if(ref){
+                        ref.del();
+                    }
+                })
+            },
+            initRefsArray: function(){
                 let diary_title = this.$refs.diary_title;
                 let diary_achievement = this.$refs.diary_achievement;
                 let diary_time_record = this.$refs.diary_time_record;
                 let diary_target = this.$refs.diary_target;
                 let diary_inspiration = this.$refs.diary_inspiration;
                 let diary_photos = this.$refs.diary_photos;
-                let refs = [];
-                refs.push(diary_title);
-                refs.push(diary_achievement);
-                refs.push(diary_time_record);
-                refs.push(diary_target);
-                refs.push(diary_inspiration);
-                refs.push(diary_photos);
-                //这些组件中必须包含两个方法： parse和isChange
-                let isChange = false;
-                let isEmpty = true;
-                refs.forEach(item => {
-                    if (!item.isEmpty()) {
-                        isEmpty = false;
-                    }
+                this.refsArray.push(diary_title);
+                this.refsArray.push(diary_achievement);
+                this.refsArray.push(diary_time_record);
+                this.refsArray.push(diary_target);
+                this.refsArray.push(diary_inspiration);
+                this.refsArray.push(diary_photos);
+            },
+            //适用于前台点击保存
+            generate: function () {
+                let result = '';
+                this.refsArray.forEach(ref => {
+                    result += ref.parse();
                 });
-                refs.forEach(item => {
-                    if (item !== diary_target && item.isChange()) {
-                        isChange = true;
-                    }
-                });
-                let msg = '';
-                if (isAuto) {
-                    //自动保存
-                    if (!isEmpty && isChange) {
-                        refs.forEach(item => {
-                            result += item.parse();
-                        });
-                        this.output = result;
-                        msg = '内容已自动保存';
-                        this.showMessage(msg)
-                    }
-                } else {
-                    if (!isEmpty) {
-                        refs.forEach(item => {
-                            result += item.parse();
-                        });
-                        this.output = result;
-                        msg = '内容已成功粘贴到剪切板';
-                        this.showMessage(msg)
-                    } else {
-                        this.$message({
-                            message: '请输入内容后再保存',
-                            type: 'error'
-                        });
-                    }
-                }
+                let msg = '内容已粘贴到剪切板';
+                this.showMessage(msg);
+                this.$store.commit(SYSTEM_COPY, result);
             },
             showMessage: function (msg) {
-                if (this.isForeground) {
-                    this.$store.commit(COPY,this.output);
                     this.$message({
                         message: msg,
                         type: 'success'
                     });
-                } else {
-                    //undo
-                }
             },
             preDay: function () {
                 let date = new Date(this.date);
@@ -155,73 +137,42 @@
                 this.date = new Date().toLocaleDateString();
             },
             remove: function () {
-                let diary_title = this.$refs.diary_title;
-                let diary_achievement = this.$refs.diary_achievement;
-                let diary_time_record = this.$refs.diary_time_record;
-                let diary_target = this.$refs.diary_target;
-                let diary_inspiration = this.$refs.diary_inspiration;
-                let diary_photos = this.$refs.diary_photos;
-                let refs = [];
-                refs.push(diary_title);
-                refs.push(diary_achievement);
-                refs.push(diary_time_record);
-                refs.push(diary_target);
-                refs.push(diary_inspiration);
-                refs.push(diary_photos);
-                let isEmpty = true;
-                refs.forEach(item => {
-                    if (!item.isEmpty()) {
-                        isEmpty = false;
-                    }
-                });
-                if (isEmpty) {
-                    this.$message({
-                        message: '请输入内容后再删除',
-                        type: 'error'
-                    });
-                } else {
-                    refs.forEach(item => {
-                        item.del();
-                    });
-                    this.$message({
-                        message: '删除成功',
-                        type: 'success'
-                    });
-                }
-
+                this.clear();
+                this.showMessage('删除成功');
             }
         },
         mounted: function () {
+            //初始化refs引用
+            this.initRefsArray();
             EventBus.$on(SYSTEM, (data) => {
                 if (data.action === PRE) {
                     this.preDay();
                 } else if (data.action === NEXT) {
                     this.nextDay();
-                } else if (data.action === AUTOSAVE) {
-                    this.generate(true);
+                } else if (data.action === save) {
+                    this.save();
                 } else if (data.action === QUIT) {
-                    this.generate(true);
+                    this.save();
                     this.$store.dispatch(SYSTEM_QUIT);
                 } else if (data.action === NEXT_ROUTER) {
                     this.$router.push({path: '/target'});
                 } else if (data.action === ONSHOW) {
-                    this.isForeground = true;
-                    let dateStr = new Date().toLocaleDateString();
-                    if (dateStr !== this.date) {
-                        this.date = dateStr;
-                    }
+                    //todo 这里还没有想好如何满足切换时间
+                    // let dateStr = new Date().toLocaleDateString();
+                    // if (dateStr !== this.date) {
+                    //     this.date = dateStr;
+                    // }
                 } else if (data.action === ONBLUR) {
-                    this.isForeground = false;
-                    // this.$store.commit(CLEAR_CLIPBOARD,this.output);
+                    //undo
                 } else if (data.action === ONFOCUS) {
-                    this.isForeground = true;
+                    //undo
                 }
             });
         },
         beforeDestroy: function () {
+            this.save();
             EventBus.$off(SYSTEM);
-
-        },
+        }
     }
 </script>
 <style scoped lang="scss">

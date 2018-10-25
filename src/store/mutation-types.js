@@ -51,6 +51,8 @@ export const ROUTER = 'router';
 export const SYSTEM_IPCKEY = SYSTEM;
 export const SYSTEM_IPCRENDERERKEY = SYSTEM + RENDERER;
 export const SYSTEM_QUIT = SYSTEM + '/' + QUIT;
+export const SYSTEM_COPY = SYSTEM + '/' + COPY;
+
 export const PRE_ROUTER = PRE + '_' + ROUTER;
 export const NEXT_ROUTER = NEXT + '_' + ROUTER;
 export const ONSHOW = 'onShow';

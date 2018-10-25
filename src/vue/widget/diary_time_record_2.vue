@@ -101,7 +101,6 @@
                 }
             },
             parse: function () {
-                this.save();
                 let result = '### 时间记录\n';
                 result += '|事项|开始|结束|备注|\n';
                 result += '|---|---|---|---|\n';

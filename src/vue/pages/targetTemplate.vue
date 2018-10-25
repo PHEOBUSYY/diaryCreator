@@ -35,7 +35,7 @@
             <button class="ui button teal make"
                     @click="dialogVisible = true">clear
             </button>
-            <button class="ui button teal make" @click="save" v-if="realData.length > 0">OK
+            <button class="ui button teal make" @click="make" v-if="realData.length > 0">OK
             </button>
         </div>
         <el-dialog
@@ -59,8 +59,7 @@
     import {EventBus} from "../../Events";
     import {
         TARGET_SENDIPC,
-        COPY,
-        CLEAR_CLIPBOARD,
+        SYSTEM_COPY,
         TARGET_GETOBJ,
         METHOD_GET,
         METHOD_CREATE,
@@ -78,7 +77,6 @@
         ONFOCUS
     } from '../../store/mutation-types'
 
-    //目标就是把所有关于electron ipc的逻辑都放在后面的vux中，触发事件通过action来完成，解析结果在main.js中
     export default {
         components: {Target_week_summary, Target_item, diary_section_header},
         data: function () {
@@ -104,8 +102,7 @@
                     firstDayOfWeek: 1
                 },
                 timeRange: new Date().toLocaleDateString(),
-                generate: '',
-                isForeground: true
+                parseResult: ''
             };
         },
         computed: {
@@ -133,7 +130,8 @@
             timeRange: {
                 handler: function (newVal, oldVal) {
                     if (newVal !== oldVal) {
-                        this.timeChange()
+                        this.save();
+                        this.timeChange();
                     }
                 },
                 immediate: true
@@ -150,6 +148,10 @@
             },
         },
         methods: {
+            make: function () {
+                this.save();
+                this.generate();
+            },
             preWeek: function () {
                 let date = new Date(this.timeRange);
                 date.setDate(date.getDate() - 7);
@@ -169,13 +171,26 @@
                     week: []
                 })
             },
-            save: function () {
-                this.$store.dispatch(TARGET_SENDIPC, {
-                    method: METHOD_CREATE,
-                    time: this.realTime,
-                    targets: (this.realData && this.realData.length > 0) ? this.realData: null,
+            isChange: function () {
+                return this.parseResult !== JSON.stringify({
+                    targets: this.realData,
                     summary: this.summary
                 });
+            },
+            save: function () {
+                if (isChange) {
+                    this.$store.dispatch(TARGET_SENDIPC, {
+                        method: METHOD_CREATE,
+                        time: this.realTime,
+                        targets: (this.realData && this.realData.length > 0) ? this.realData : null,
+                        summary: this.summary
+                    });
+                    this.parseResult = JSON.stringify({
+                        targets: this.realData,
+                        summary: this.summary
+                    });
+                }
+
             },
             clear: function () {
                 this.$store.dispatch(TARGET_SENDIPC, {
@@ -198,7 +213,7 @@
                     return '- [ ] ' + prefix + '. ' + item.text + '\r\n'
                 }
             },
-            generateTemplate: function () {
+            generate: function () {
                 let output = '';
                 let result = [];
                 output += '## 每周目标' + this.realTime.replace(/-/g, '') + "-" + this.realTimeEnd.replace(/-/g, '');
@@ -242,18 +257,16 @@
                     output += '\r\n';
                 }
                 output += this.$refs.summary.parse();
-                this.generate = output;
                 //拼接总结部分
-                if(this.isForeground){
-                    this.$store.commit(COPY, this.generate);
-                    this.$message({
-                        message: '计划已粘贴到剪切板',
-                        type: 'success'
-                    });
-                }
+                this.$store.commit(SYSTEM_COPY, output);
+                this.$message({
+                    message: '计划已粘贴到剪切板',
+                    type: 'success'
+                });
             }
         },
         beforeDestroy: function () {
+            this.save();
             EventBus.$off();
         },
         mounted: function () {
@@ -267,23 +280,23 @@
                     this.$store.dispatch(SYSTEM_QUIT);
                 } else if (data.action === AUTOSAVE) {
                     this.save();
-                } else if (data.action === PRE_ROUTER){
+                } else if (data.action === PRE_ROUTER) {
                     this.$router.push({path: '/'});
-                }else if (data.action === ONSHOW){
-                    this.isForeground = true;
-                    let dateStr = new Date().toLocaleDateString();
-                    if(dateStr !== this.timeRange){
-                        this.timeRange = dateStr;
-                    }
-                }else if(data.action === ONBLUR){
-                    this.isForeground = false;
-                    // this.$store.commit(CLEAR_CLIPBOARD);
-                }else if(data.action === ONFOCUS){
-                    this.isForeground = true;
+                } else if (data.action === ONSHOW) {
+                    //todo 这里还没有想好如何满足切换时间
+                    // let now = new Date();
+                    // let dateStr = now.toLocaleDateString();
+                    // if (dateStr !== this.timeRange) {
+                    //     this.timeRange = dateStr;
+                    // }
+                } else if (data.action === ONBLUR) {
+                    //undo
+                } else if (data.action === ONFOCUS) {
+                    //undo
                 }
             });
             EventBus.$on(AFTERSAVE, () => {
-                this.generateTemplate();
+                this.generate();
             });
         },
     };

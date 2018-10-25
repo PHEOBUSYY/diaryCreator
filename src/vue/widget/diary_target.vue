@@ -47,6 +47,7 @@
                 weekTarget: [],
                 todayTarget: [],
                 tomorrowTarget: [],
+                parseResult: ''
             }
         },
         props: {
@@ -99,7 +100,6 @@
                 }
             },
             parse: function () {
-                this.save();
                 let output = '\r\n';
                 output += '### 本周目标\r\n';
                 for (let i = 0; i < this.targetList.length; i++) {
@@ -120,7 +120,7 @@
                 return this.output;
             },
             isChange: function () {
-                return false;
+                return this.parseResult !== JSON.stringify(this.tomorrowTarget);
             },
             del: function () {
                 //undo 不删除计划相关内容
@@ -177,25 +177,28 @@
                 });
             },
             save: function () {
-                let newList = [];
-                this.tomorrowTarget.forEach(item => {
-                    let find = false;
-                    for(let i =0;i< this.targetList.length;i++){
-                        if(item.text === this.targetList[i].text){
-                            find = true;
+                if (this.isChange()) {
+                    let newList = [];
+                    this.tomorrowTarget.forEach(item => {
+                        let find = false;
+                        for(let i =0;i< this.targetList.length;i++){
+                            if(item.text === this.targetList[i].text){
+                                find = true;
+                            }
                         }
-                    }
-                    if(!find){
-                        newList.push(item);
-                    }
-                });
-                this.targetList = this.targetList.concat(newList);
-                this.$store.dispatch(TARGET_SENDIPC , {
-                    method: METHOD_CREATE,
-                    time: this.realTime,
-                    targets: this.targetList,
-                    summary: {}
-                });
+                        if(!find){
+                            newList.push(item);
+                        }
+                    });
+                    this.targetList = this.targetList.concat(newList);
+                    this.$store.dispatch(TARGET_SENDIPC , {
+                        method: METHOD_CREATE,
+                        time: this.realTime,
+                        targets: this.targetList,
+                        summary: {}
+                    });
+                    this.parseResult = JSON.stringify(this.tomorrowTarget);
+                }
             }
         },
         mounted: function () {

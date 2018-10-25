@@ -79,7 +79,6 @@
             },
             parse: function () {
                 //渲染为markdown
-                this.save();
                 let result = '\n';
                 if (this.dataList.length > 0) {
                     result += '### ' + this.title + '\n\n';
@@ -97,7 +96,6 @@
             },
             save: function () {
                 if (this.isChange()) {
-
                     this.$store.dispatch(INPUTGROUP_SENDIPC, {
                         method: METHOD_CREATE,
                         time: this.date,
