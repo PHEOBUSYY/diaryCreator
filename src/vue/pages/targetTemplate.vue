@@ -9,17 +9,24 @@
         </div>
         <diary_section_header title="目标模板"></diary_section_header>
         <div class="header">
-            <a class="section labeled teal active" @click="preWeek"><</a>
-            <el-date-picker
-                    style="width: 50%"
-                    v-model="timeRange"
-                    type="week"
-                    format="yyyy 第 WW 周"
-                    placeholder="选择周"
-                    :picker-options="pickerOptions"
-            >
-            </el-date-picker>
-            <a class="section labeled teal active" @click="nextWeek">></a>
+            <a class="section labeled teal active" @click="preWeek">&lt;</a>
+            <div style="display: flex;flex-direction: column;justify-content: center;align-content: center;align-items: center;width: 100%">
+                <el-date-picker v-if="timeEdit"
+                                style="width: 50%"
+                                v-model="timeRange"
+                                type="week"
+                                ref="timePicker"
+                                format="yyyy 第 WW 周"
+                                placeholder="选择周"
+                                :picker-options="pickerOptions"
+                                @change="onSelectTime"
+                                @blur="timeEdit = false"
+                >
+                </el-date-picker>
+                <a v-else  @click="timeEdit = true" >{{realTime + ' - ' + realTimeEnd}}</a>
+            </div>
+            <a class="section labeled teal active"
+               @click="nextWeek">&gt;</a>
         </div>
         <target_item v-for="(item, index) in targetList" v-model="targetList[index]"
                      :key="index+'_target_item_'"
@@ -102,7 +109,8 @@
                     firstDayOfWeek: 1
                 },
                 timeRange: new Date().toLocaleDateString(),
-                parseResult: ''
+                parseResult: '',
+                timeEdit: false
             };
         },
         computed: {
@@ -148,6 +156,9 @@
             },
         },
         methods: {
+            onSelectTime: function () {
+                this.timeEdit = false;
+            },
             make: function () {
                 this.save();
                 this.generate();
@@ -178,7 +189,7 @@
                 });
             },
             save: function () {
-                if (isChange) {
+                if (this.isChange) {
                     this.$store.dispatch(TARGET_SENDIPC, {
                         method: METHOD_CREATE,
                         time: this.realTime,
@@ -294,9 +305,6 @@
                 } else if (data.action === ONFOCUS) {
                     //undo
                 }
-            });
-            EventBus.$on(AFTERSAVE, () => {
-                this.generate();
             });
         },
     };
